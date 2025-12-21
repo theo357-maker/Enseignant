@@ -1,0 +1,3877 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Espace Enseignant - CS la Colombe</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <!-- Ajout pour l'export Word -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.1.0/docx.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <!-- PWA Meta Tags -->
+    <meta name="application-name" content="TheoVêt">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="TheoVêt">
+    <meta name="description" content="Solution complète de gestion de commerce de vêtements">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="msapplication-TileColor" content="#3498db">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="theme-color" content="#3498db">
+
+
+<!-- Service Worker et mise à jour -->
+<meta name="version" content="2.1.0">
+<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+
+
+
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" href="icon-192x192.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="icon-192x192.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="icons/icon-167x167.png">
+
+    <!-- Manifest -->
+    <link rel="manifest" href="manifest.json">
+
+    <!-- Styles et Bibliothèques -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+
+<!-- Scripts de mise à jour -->
+<script src="update-system.js"></script>
+
+    
+    <style>
+        :root {
+            --primary: #3498db; --secondary: #2c3e50; --success: #27ae60;
+            --danger: #e74c3c; --warning: #f39c12; --info: #1abc9c;
+            --light: #ecf0f1; --dark: #34495e;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f5f6fa; }
+        .hidden { display: none !important; }
+
+        /* --- Styles Communs --- */
+        .login-overlay { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0,0,0,0.7); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            z-index: 2000; 
+        }
+        .login-card { 
+            background: white; 
+            padding: 3rem; 
+            border-radius: 10px; 
+            width: 90%; 
+            max-width: 400px; 
+            text-align: center; 
+        }
+        .app-container { display: flex; min-height: 100vh; }
+        .sidebar { width: 250px; background: white; box-shadow: 2px 0 10px rgba(0,0,0,0.08); flex-shrink: 0; }
+        .nav-menu { list-style: none; padding: 1rem 0; margin: 0; }
+        .nav-menu li a { display: flex; align-items: center; gap: 12px; padding: 14px 20px; color: var(--dark); text-decoration: none; font-weight: 500; }
+        .nav-menu li a.active, .nav-menu li a:hover { background: #eaf5fc; color: var(--primary); }
+        .main-content { flex: 1; display: flex; flex-direction: column; }
+        .app-header { background: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; }
+        .content-area { padding: 2rem; }
+        .page { display: none; }
+        .page.active { display: block; }
+        .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: 500; color: white; }
+        .btn-primary { background: var(--primary); }
+        .btn-success { background: var(--success); }
+        .btn-danger { background: var(--danger); }
+        .btn-warning { background: var(--warning); }
+        .btn-info { background: var(--info); }
+        .btn-secondary { background: var(--secondary); }
+        .form-control { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; }
+        .card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 1.5rem; }
+        .profile-card { display: flex; align-items: center; gap: 1.5rem; }
+        .profile-avatar { 
+            width: 80px; 
+            height: 80px; 
+            border-radius: 50%; 
+            background: var(--primary); 
+            color: white; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 2rem; 
+            overflow: hidden;
+        }
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .teacher-photo-header {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary);
+        }
+        .photo-placeholder-header {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; }
+        .stat-card { text-align: center; }
+        .stat-card h3 { font-size: 1rem; color: #555; margin-bottom: 0.5rem; }
+        .stat-card span { font-size: 2rem; font-weight: bold; color: var(--dark); }
+        .alert { padding: 1rem; border-radius: 5px; margin-bottom: 1rem; }
+        .alert-success { background: #d4edda; color: #155724; }
+        .alert-error { background: #f8d7da; color: #721c24; }
+        .alert-info { background: #d1ecf1; color: #0c5460; }
+        .tabs { display: flex; border-bottom: 1px solid #ddd; margin-bottom: 1.5rem; }
+        .tab { padding: 10px 20px; cursor: pointer; border-bottom: 2px solid transparent; }
+        .tab.active { border-bottom: 2px solid var(--primary); color: var(--primary); font-weight: 500; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background-color: #f8f9fa; font-weight: 600; }
+        tr:hover { background-color: #f8f9fa; }
+        .classes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+        .class-card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-left: 4px solid var(--primary); }
+        .grade-red { background-color: #ffebee; color: #c62828; font-weight: bold; }
+        .grade-green { background-color: #e8f5e8; color: #2e7d32; font-weight: bold; }
+        .grade-input { width: 80px; padding: 5px; border: 1px solid #ddd; border-radius: 4px; text-align: center; }
+        .action-buttons { display: flex; gap: 0.5rem; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: white; padding: 2rem; border-radius: 10px; width: 90%; max-width: 800px; max-height: 90vh; overflow-y: auto; }
+
+  
+/* Styles pour les notifications de mise à jour */
+.update-toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: white;
+  border-left: 4px solid #3498db;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+  padding: 15px 20px;
+  min-width: 300px;
+  max-width: 400px;
+  z-index: 9999;
+  transform: translateX(120%);
+  transition: transform 0.3s ease;
+}
+
+.update-toast.show {
+  transform: translateX(0);
+}
+
+.update-toast.success {
+  border-left-color: #27ae60;
+}
+
+.update-toast.warning {
+  border-left-color: #f39c12;
+}
+
+.update-toast.danger {
+  border-left-color: #e74c3c;
+}
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .close-modal { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666; }
+        .export-options { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .loading { text-align: center; padding: 2rem; color: #666; }
+        .student-photo { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+        .photo-placeholder { width: 40px; height: 40px; border-radius: 50%; background: #eee; display: flex; align-items: center; justify-content: center; color: #999; }
+        .attendance-actions { display: flex; gap: 0.5rem; }
+        .attendance-status { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
+        .present { background-color: #e8f5e8; color: #2e7d32; }
+        .absent { background-color: #ffebee; color: #c62828; }
+        .late { background-color: #fff3e0; color: #ef6c00; }
+        .homework-card { border-left: 4px solid var(--info); margin-bottom: 1rem; }
+        .homework-actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
+        .submission-card { border-left: 4px solid var(--warning); margin-top: 1rem; }
+        .grade-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+        .schedule-table { width: 100%; }
+        .schedule-table th { background-color: var(--primary); color: white; }
+        .schedule-table td { text-align: center; padding: 10px; }
+        .schedule-table .current-time { background-color: #e3f2fd; }
+        .file-upload { border: 2px dashed #ddd; padding: 2rem; text-align: center; border-radius: 8px; margin-bottom: 1rem; }
+        .file-upload.active { border-color: var(--primary); background-color: #eaf5fc; }
+        .file-preview { max-width: 200px; max-height: 200px; margin-top: 1rem; }
+        .timetable-day { margin-bottom: 2rem; }
+        .timetable-day h4 { background-color: var(--primary); color: white; padding: 0.5rem 1rem; border-radius: 4px; margin-bottom: 0.5rem; }
+        .timetable-session { display: flex; justify-content: space-between; padding: 0.5rem; border-bottom: 1px solid #eee; }
+        .timetable-session.current { background-color: #e3f2fd; }
+        .grades-table input { width: 80px; }
+        .btn-sm { padding: 5px 10px; font-size: 0.8rem; }
+        
+        /* --- Styles pour la proclamation --- */
+        .proclamation-table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+        .proclamation-table th, .proclamation-table td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        .proclamation-table th { background-color: #f8f9fa; font-weight: bold; }
+        .proclamation-table .sub-header { background-color: #e9ecef; }
+        .grade-pass { background-color: #d4edda; color: #155724; }
+        .grade-fail { background-color: #f8d7da; color: #721c24; }
+        .teacher-section { margin-bottom: 2rem; border: 1px solid #ddd; padding: 1rem; border-radius: 5px; }
+        .teacher-section h4 { margin-bottom: 1rem; color: var(--primary); }
+        
+        /* Nouveaux styles pour le système par période */
+        .period-selector { 
+            display: flex; 
+            gap: 10px; 
+            margin-bottom: 20px; 
+            flex-wrap: wrap; 
+        }
+        .period-option {
+            padding: 10px 20px;
+            border: 2px solid var(--primary);
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+            text-align: center;
+            min-width: 150px;
+        }
+        .period-option:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+        .period-option.selected {
+            background-color: var(--primary);
+            color: white;
+            transform: scale(1.05);
+        }
+        .period-description {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--info);
+        }
+        .excel-like-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .excel-like-table th {
+            background-color: #2c3e50;
+            color: white;
+            padding: 12px;
+            border: 1px solid #ddd;
+        }
+        .excel-like-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        .excel-like-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .excel-like-table tr:hover {
+            background-color: #eaf5fc;
+        }
+        .editable-cell {
+            cursor: pointer;
+            position: relative;
+        }
+        .editable-cell input {
+            width: 100%;
+            height: 100%;
+            border: 2px solid var(--primary);
+            text-align: center;
+            font-weight: bold;
+        }
+        .calculation-row {
+            background-color: #e8f5e9 !important;
+            font-weight: bold;
+        }
+        .total-row {
+            background-color: #bbdefb !important;
+            font-weight: bold;
+        }
+        .period-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .summary-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .summary-card h4 {
+            margin-bottom: 10px;
+            color: var(--dark);
+            font-size: 0.9rem;
+        }
+        .summary-card .value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        .download-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .download-options button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .ranking-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            font-weight: bold;
+            min-width: 30px;
+            text-align: center;
+        }
+        .ranking-1 { background-color: #ffd700; color: #000; }
+        .ranking-2 { background-color: #c0c0c0; color: #000; }
+        .ranking-3 { background-color: #cd7f32; color: #000; }
+    </style>
+</head>
+<body>
+    <!-- Écran de connexion -->
+    <div id="login-overlay" class="login-overlay">
+        <div class="login-card">
+            <h3>Espace Enseignant</h3>
+            <div class="tabs" style="margin-top: 1.5rem;">
+                <div class="tab active" data-tab="login">Connexion</div>
+                <div class="tab" data-tab="register">Activer mon compte</div>
+            </div>
+            
+            <!-- Formulaire de connexion -->
+            <div id="login-tab" class="tab-content active">
+                <form id="login-form" style="margin-top: 1.5rem;">
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="login-matricule" placeholder="Matricule Enseignant" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" class="form-control" id="login-password" placeholder="Mot de passe" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Connexion</button>
+                </form>
+            </div>
+            
+            <!-- Formulaire d'activation de compte -->
+            <div id="register-tab" class="tab-content">
+                <form id="register-form" style="margin-top: 1.5rem;">
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="register-matricule" placeholder="Matricule Enseignant" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" class="form-control" id="register-email" placeholder="Email personnel" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" class="form-control" id="register-password" placeholder="Nouveau mot de passe" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" class="form-control" id="register-confirm-password" placeholder="Confirmer le mot de passe" required>
+                    </div>
+                    <button type="submit" class="btn btn-success" style="width: 100%;">Activer mon compte</button>
+                </form>
+            </div>
+            
+            <div id="login-alert" class="alert hidden" style="margin-top: 1rem;"></div>
+        </div>
+    </div>
+
+    <!-- Contenu de l'application -->
+    <div id="app-root" class="app-container hidden">
+        <nav class="sidebar">
+            <div style="padding: 1.5rem; text-align: center; border-bottom: 1px solid #eee;">
+                <i class="fas fa-chalkboard-teacher" style="font-size: 2rem; color: var(--primary);"></i>
+                <h3 style="margin-top: 0.5rem;">Espace Enseignant</h3>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#" class="active" data-page="dashboard"><i class="fas fa-tachometer-alt fa-fw"></i> Tableau de bord</a></li>
+                <li><a href="#" data-page="classes"><i class="fas fa-door-open fa-fw"></i> Mes Classes</a></li>
+                <li><a href="#" data-page="students"><i class="fas fa-users fa-fw"></i> Mes Élèves</a></li>
+                <li><a href="#" data-page="grades"><i class="fas fa-edit fa-fw"></i> Gestion des Notes</a></li>
+                <li><a href="#" data-page="attendance"><i class="fas fa-clipboard-check fa-fw"></i> Présences</a></li>
+                <li><a href="#" data-page="homework"><i class="fas fa-book fa-fw"></i> Devoirs</a></li>
+                <li id="proclamation-nav-item" class="hidden"><a href="#" data-page="proclamation"><i class="fas fa-chart-bar fa-fw"></i> Proclamation</a></li>
+                <li><a href="#" data-page="schedule"><i class="fas fa-calendar-alt fa-fw"></i> Mon Emploi du Temps</a></li>
+                <li><a href="#" data-page="profile"><i class="fas fa-user fa-fw"></i> Mon Profil</a></li>
+            </ul>
+        </nav>
+        <div class="main-content">
+            <header class="app-header">
+                <h2 id="page-title">Tableau de bord</h2>
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <!-- Photo de profil dans l'en-tête -->
+                    <div id="teacher-photo-header">
+                        <!-- La photo sera chargée dynamiquement -->
+                    </div>
+                    <span id="teacher-name-header"></span>
+                    <button id="logout-btn" class="btn btn-danger">Déconnexion</button>
+                </div>
+            </header>
+            <main class="content-area">
+                <div id="global-alert" class="alert hidden"></div>
+
+                <!-- Page: Tableau de bord -->
+                <div id="dashboard-page" class="page active">
+                    <div class="loading" id="dashboard-loading">
+                        <i class="fas fa-spinner fa-spin"></i> Chargement des données...
+                    </div>
+                    <div id="dashboard-content" class="hidden">
+                        <div class="card profile-card">
+                            <!-- Photo de profil dans le tableau de bord -->
+                            <div class="profile-avatar" id="teacher-profile-avatar">
+                                <i class="fas fa-user-tie"></i>
+                            </div>
+                            <div>
+                                <h3 id="teacher-fullname" style="font-size: 1.5rem;"></h3>
+                                <p id="teacher-subjects" style="color: #555;"></p>
+                                <p id="teacher-matricule" style="color: #777; font-size: 0.9rem;"></p>
+                            </div>
+                        </div>
+                        <div class="stats-grid">
+                            <div class="card stat-card"><h3>Classes assignées</h3><span id="classes-count">-</span></div>
+                            <div class="card stat-card"><h3>Élèves total</h3><span id="students-count">-</span></div>
+                            <div class="card stat-card"><h3>Notes à saisir</h3><span id="pending-grades">-</span></div>
+                            <div class="card stat-card"><h3>Devoirs en attente</h3><span id="pending-homework">-</span></div>
+                        </div>
+                        
+                        <div class="card">
+                            <h3>Mes Classes</h3>
+                            <div id="next-classes-container" class="classes-grid"></div>
+                        </div>
+                        
+                        <div class="card">
+                            <h3>Prochain Cours</h3>
+                            <div id="next-class-info">
+                                <p id="next-class-details">Aucun cours prévu aujourd'hui</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Page: Mes Classes -->
+                <div id="classes-page" class="page">
+                    <div class="loading" id="classes-loading">
+                        <i class="fas fa-spinner fa-spin"></i> Chargement des classes...
+                    </div>
+                    <div id="classes-content" class="hidden">
+                        <div class="card">
+                            <h3>Mes Classes Assignées</h3>
+                            <div id="classes-container" class="classes-grid"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Page: Mes Élèves -->
+                <div id="students-page" class="page">
+                    <div class="loading" id="students-loading">
+                        <i class="fas fa-spinner fa-spin"></i> Chargement des élèves...
+                    </div>
+                    <div id="students-content" class="hidden">
+                        <div class="card">
+                            <div class="form-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                                <h3>Liste de Mes Élèves</h3>
+                                <div class="export-options">
+                                    <select id="students-class-filter" class="form-control" style="min-width: 200px;">
+                                        <option value="">Toutes les classes</option>
+                                    </select>
+                                    <button id="export-students-btn" class="btn btn-info">
+                                        <i class="fas fa-file-excel"></i> Exporter Excel
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="students-container"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Page: Gestion des Notes -->
+                <div id="grades-page" class="page">
+                    <div class="loading" id="grades-loading">
+                        <i class="fas fa-spinner fa-spin"></i> Chargement des données...
+                    </div>
+                    <div id="grades-content" class="hidden">
+                        <!-- Nouvelle interface par période -->
+                        <div class="card">
+                            <h3>Système de Gestion des Notes par Période</h3>
+                            
+                            <!-- Sélection de la période -->
+                            <div class="period-selector">
+                                <div class="period-option" data-period="P1" onclick="selectPeriod('P1')">1ère P</div>
+                                <div class="period-option" data-period="P2" onclick="selectPeriod('P2')">2ème P</div>
+                                <div class="period-option" data-period="EXAM_S1" onclick="selectPeriod('EXAM_S1')">Examen Semestre 1</div>
+                                <div class="period-option" data-period="TOTAL_S1" onclick="selectPeriod('TOTAL_S1')">Total Semestre 1</div>
+                                <div class="period-option" data-period="P3" onclick="selectPeriod('P3')">3ème P</div>
+                                <div class="period-option" data-period="P4" onclick="selectPeriod('P4')">4ème P</div>
+                                <div class="period-option" data-period="EXAM_S2" onclick="selectPeriod('EXAM_S2')">Examen Semestre 2</div>
+                                <div class="period-option" data-period="TOTAL_S2" onclick="selectPeriod('TOTAL_S2')">Total Semestre 2</div>
+                                <div class="period-option" data-period="TOTAL_GENERAL" onclick="selectPeriod('TOTAL_GENERAL')">Total Général</div>
+                            </div>
+                            
+                            <!-- Description de la période -->
+                            <div id="period-description" class="period-description">
+                                <h4>Sélectionnez une période pour commencer</h4>
+                                <p>Chaque période a des règles de calcul spécifiques :</p>
+                                <ul>
+                                    <li><strong>1ère P, 2ème P, 3ème P, 4ème P:</strong> Notes des évaluations continues</li>
+                                    <li><strong>Examen Semestre 1/2:</strong> Notes d'examen</li>
+                                    <li><strong>Total Semestre 1/2:</strong> Somme des périodes + examen</li>
+                                    <li><strong>Total Général:</strong> Moyenne des deux semestres</li>
+                                </ul>
+                            </div>
+                            
+                            <!-- Formulaire de saisie -->
+                            <div id="period-form" class="hidden">
+                                <div class="form-row" style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+                                    <div class="form-group" style="flex: 1;">
+                                        <label>Classe</label>
+                                        <select id="period-class-select" class="form-control">
+                                            <option value="">-- Choisir une classe --</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group" style="flex: 1;">
+                                        <label>Matière</label>
+                                        <select id="period-subject" class="form-control">
+                                            <option value="">-- Choisir une matière --</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group" style="flex: 1;">
+                                        <label>Type d'évaluation</label>
+                                        <select id="period-grade-type" class="form-control">
+                                            <option value="devoir">Devoir</option>
+                                            <option value="composition">Composition</option>
+                                            <option value="interrogation">Interrogation</option>
+                                            <option value="projet">Projet</option>
+                                            <option value="examen">Examen</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-row" style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+                                    <div class="form-group" style="flex: 1;">
+                                        <label>Point maximum (CM)</label>
+                                        <input type="number" id="period-max-points" class="form-control" value="20" min="1">
+                                    </div>
+                                    <div class="form-group" style="flex: 2;">
+                                        <label>Description de l'évaluation</label>
+                                        <input type="text" id="period-evaluation-description" class="form-control" placeholder="Ex: Devoir sur les fonctions">
+                                    </div>
+                                </div>
+                                <div class="form-group" style="margin-bottom: 1.5rem;">
+                                    <label>Date de l'évaluation</label>
+                                    <input type="date" id="period-evaluation-date" class="form-control">
+                                </div>
+                                
+                                <button id="load-students-btn" class="btn btn-primary">
+                                    <i class="fas fa-users"></i> Charger les élèves
+                                </button>
+                            </div>
+                            
+                            <!-- Tableau Excel-like pour la saisie -->
+                            <div id="excel-table-container" class="hidden" style="margin-top: 2rem;">
+                                <h4>Tableau de Saisie des Notes</h4>
+                                <div class="table-container">
+                                    <table class="excel-like-table" id="grades-excel-table">
+                                        <thead>
+                                            <tr>
+                                                <th>N°</th>
+                                                <th>Matricule</th>
+                                                <th>Nom Complet</th>
+                                                <th>Note (CO)</th>
+                                                <th>CM Max</th>
+                                                <th>Pourcentage</th>
+                                                <th>Remarques</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="grades-table-body">
+                                            <!-- Rempli dynamiquement -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <div style="margin-top: 1.5rem;">
+                                    <button id="save-period-grades-btn" class="btn btn-success">
+                                        <i class="fas fa-save"></i> Enregistrer les Notes
+                                    </button>
+                                    <button id="update-period-grades-btn" class="btn btn-warning">
+                                        <i class="fas fa-sync"></i> Mettre à jour le Tableau
+                                    </button>
+                                    <button id="clear-period-table-btn" class="btn btn-danger">
+                                        <i class="fas fa-trash"></i> Effacer le Tableau
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Tableau des notes enregistrées pour cette période -->
+                            <div id="saved-grades-container" class="hidden" style="margin-top: 2rem;">
+                                <h4>Notes Enregistrées pour cette Période</h4>
+                                <div class="table-container" id="saved-grades-table-container"></div>
+                            </div>
+                            
+                            <!-- Section publication -->
+                            <div id="publication-section" class="hidden" style="margin-top: 2rem;">
+                                <h4>Publication des Notes</h4>
+                                <div class="form-group">
+                                    <label>Message aux parents/titulaires (optionnel)</label>
+                                    <textarea id="publication-message" class="form-control" rows="3" placeholder="Ex: Notes du premier devoir de mathématiques..."></textarea>
+                                </div>
+                                <div class="form-row" style="display: flex; gap: 1rem; margin-top: 1rem;">
+                                    <button id="publish-to-parents-btn" class="btn btn-success">
+                                        <i class="fas fa-share-square"></i> Publier aux Parents
+                                    </button>
+                                    <button id="publish-to-tutors-btn" class="btn btn-info">
+                                        <i class="fas fa-user-tie"></i> Publier aux Titulaires
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Section pour afficher les calculs -->
+                        <div id="calculations-container" class="hidden">
+                            <!-- Rempli dynamiquement selon la période -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Page: Présences -->
+                <div id="attendance-page" class="page">
+                    <div class="loading" id="attendance-loading">
+                        <i class="fas fa-spinner fa-spin"></i> Chargement des données...
+                    </div>
+                    <div id="attendance-content" class="hidden">
+                        <div class="card">
+                            <h3>Gestion des Présences</h3>
+                            <div class="form-row" style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+                                <div class="form-group" style="flex: 1;">
+                                    <label>Sélectionner une classe</label>
+                                    <select id="attendance-class-select" class="form-control">
+                                        <option value="">-- Choisir une classe --</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="flex: 1;">
+                                    <label>Date</label>
+                                    <input type="date" id="attendance-date" class="form-control" value="">
+                                </div>
+                            </div>
+                            <div id="attendance-container"></div>
+                            <div style="margin-top: 1.5rem;">
+                                <button id="save-attendance-btn" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Enregistrer les Présences
+                                </button>
+                                <button id="publish-attendance-btn" class="btn btn-success">
+                                    <i class="fas fa-share"></i> Publier les Présences
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <h3>Historique des Présences</h3>
+                            <div id="attendance-history-container"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Page: Devoirs -->
+                <div id="homework-page" class="page">
+                    <div class="loading" id="homework-loading">
+                        <i class="fas fa-spinner fa-spin"></i> Chargement des données...
+                    </div>
+                    <div id="homework-content" class="hidden">
+                        <div class="card">
+                            <h3>Gestion des Devoirs</h3>
+                            
+                            <!-- Formulaire d'ajout de devoir -->
+                            <div class="card" style="background: #f8f9fa;">
+                                <h4>Créer un nouveau devoir</h4>
+                                <form id="homework-form">
+                                    <div class="form-row" style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                                        <div class="form-group" style="flex: 1;">
+                                            <label>Classe</label>
+                                            <select id="homework-class" class="form-control" required>
+                                                <option value="">-- Choisir une classe --</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group" style="flex: 2;">
+                                            <label>Matière</label>
+                                            <select id="homework-subject" class="form-control" required>
+                                                <option value="">-- Choisir une matière --</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group" style="flex: 1;">
+                                            <label>Date de rendu</label>
+                                            <input type="date" id="homework-due-date" class="form-control" required>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Titre du devoir</label>
+                                        <input type="text" id="homework-title" class="form-control" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Description du devoir</label>
+                                        <textarea id="homework-description" class="form-control" rows="3" required></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Fichier du devoir (optionnel)</label>
+                                        <div class="file-upload" id="homework-file-upload">
+                                            <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #ccc;"></i>
+                                            <p>Glissez-déposez un fichier ici ou cliquez pour sélectionner</p>
+                                            <input type="file" id="homework-file" class="hidden" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                                            <button type="button" id="homework-file-btn" class="btn btn-secondary">Sélectionner un fichier</button>
+                                        </div>
+                                        <div id="homework-file-preview"></div>
+                                    </div>
+                                    <button type="button" id="add-homework-btn" class="btn btn-primary">
+                                        <i class="fas fa-paper-plane"></i> Publier le Devoir
+                                    </button>
+                                </form>
+                            </div>
+                            
+                            <!-- Liste des devoirs -->
+                            <div style="margin-top: 2rem;">
+                                <h4>Devoirs assignés</h4>
+                                <div id="homework-list-container"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Page: Proclamation -->
+                <div id="proclamation-page" class="page">
+                    <div class="card">
+                        <h3>Tableau de Proclamation par Cours</h3>
+                        <div class="form-row" style="margin-bottom: 1.5rem;">
+                            <div class="form-group" style="flex: 1;">
+                                <label>Sélectionner une classe</label>
+                                <select id="proclamation-class" class="form-control">
+                                    <option value="">-- Choisir une classe --</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label>Période</label>
+                                <select id="proclamation-period" class="form-control">
+                                    <option value="P1">1ère P</option>
+                                    <option value="P2">2ème P</option>
+                                    <option value="EXAM_S1">Examen Semestre 1</option>
+                                    <option value="TOTAL_S1">Total Semestre 1</option>
+                                    <option value="P3">3ème P</option>
+                                    <option value="P4">4ème P</option>
+                                    <option value="EXAM_S2">Examen Semestre 2</option>
+                                    <option value="TOTAL_S2">Total Semestre 2</option>
+                                    <option value="TOTAL_GENERAL">Total Général</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <button id="load-proclamation-data-btn" class="btn btn-primary" style="margin-top: 1.5rem;">
+                                    <i class="fas fa-eye"></i> Afficher le Tableau
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Information sur la période -->
+                        <div id="period-info" class="hidden">
+                            <div class="card">
+                                <h4>Période Sélectionnée: <span id="selected-period-name"></span></h4>
+                                <p id="period-calculation-info"></p>
+                            </div>
+                        </div>
+                        
+                        <!-- Tableau de proclamation par cours -->
+                        <div class="card" id="proclamation-table-card" class="hidden">
+                            <h4>Tableau des Cotes par Cours - Classement des Élèves</h4>
+                            <div class="download-options">
+                                <button id="download-excel-btn" class="btn btn-success">
+                                    <i class="fas fa-file-excel"></i> Exporter Excel
+                                </button>
+                                <button id="download-word-btn" class="btn btn-primary">
+                                    <i class="fas fa-file-word"></i> Exporter Word
+                                </button>
+                            </div>
+                            <div id="proclamation-table-container" class="table-container" style="margin-top: 1rem;"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Page: Mon Emploi du Temps -->
+                <div id="schedule-page" class="page">
+                    <div class="loading" id="schedule-loading">
+                        <i class="fas fa-spinner fa-spin"></i> Chargement de l'emploi du temps...
+                    </div>
+                    <div id="schedule-content" class="hidden">
+                        <div class="card">
+                            <h3>Mon Emploi du Temps</h3>
+                            <div id="schedule-container"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Page: Mon Profil -->
+                <div id="profile-page" class="page">
+                    <div class="card">
+                        <h3>Mon Profil</h3>
+                        <div style="display: flex; align-items: center; gap: 2rem; margin-bottom: 2rem;">
+                            <!-- Photo de profil dans la page profil -->
+                            <div class="profile-avatar" id="profile-page-avatar" style="width: 100px; height: 100px;">
+                                <i class="fas fa-user-tie"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <div class="form-row" style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                                    <div class="form-group" style="flex: 1;">
+                                        <label>Matricule Enseignant</label>
+                                        <input type="text" id="profile-matricule" class="form-control" readonly>
+                                    </div>
+                                    <div class="form-group" style="flex: 2;">
+                                        <label>Nom Complet</label>
+                                        <input type="text" id="profile-fullname" class="form-control" readonly>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Matières enseignées</label>
+                                    <input type="text" id="profile-subjects" class="form-control" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label>Classes assignées</label>
+                                    <input type="text" id="profile-classes" class="form-control" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label>Email Personnel</label>
+                                    <input type="email" id="profile-email" class="form-control" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label>Date d'inscription</label>
+                                    <input type="text" id="profile-createdAt" class="form-control" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>Changer mon mot de passe</h3>
+                        <form id="change-password-form">
+                            <div class="form-group">
+                                <label>Mot de passe actuel</label>
+                                <input type="password" id="current-password" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Nouveau mot de passe</label>
+                                <input type="password" id="new-password" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Confirmer le nouveau mot de passe</label>
+                                <input type="password" id="confirm-new-password" class="form-control" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Changer le mot de passe</button>
+                        </form>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal pour visualiser les détails d'une classe -->
+    <div id="class-details-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Détails de la Classe</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div id="class-details-content">
+                <!-- Contenu généré dynamiquement -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour visualiser les soumissions de devoirs -->
+    <div id="submissions-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Soumissions des Élèves</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div id="submissions-content">
+                <!-- Contenu généré dynamiquement -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour corriger un devoir -->
+    <div id="grade-submission-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Correction du Devoir</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div id="grade-submission-content">
+                <!-- Contenu généré dynamiquement -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour modifier une note publiée -->
+    <div id="edit-grade-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Modifier une Note</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div id="edit-grade-content">
+                <!-- Contenu généré dynamiquement -->
+            </div>
+        </div>
+    </div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+    import { 
+        getAuth, 
+        onAuthStateChanged, 
+        signInWithEmailAndPassword, 
+        signOut, 
+        updatePassword,
+        createUserWithEmailAndPassword 
+    } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+    import { 
+        getFirestore, 
+        collection, 
+        getDocs, 
+        query, 
+        where, 
+        orderBy,
+        doc,
+        updateDoc,
+        getDoc,
+        setDoc,
+        addDoc,
+        serverTimestamp,
+        writeBatch,
+        arrayUnion,
+        arrayRemove,
+        deleteDoc
+    } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+
+    // CONFIGURATION FIREBASE
+    const firebaseConfig = {
+      apiKey: "AIzaSyBn7VIddclO7KtrXb5sibCr9SjVLjOy-qI",
+      authDomain: "theo1d.firebaseapp.com",
+      projectId: "theo1d",
+      storageBucket: "theo1d.firebasestorage.app",
+      messagingSenderId: "269629842962",
+      appId: "1:269629842962:web:a80a12b04448fe1e595acb",
+      measurementId: "G-TNSG1XFMDZ"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentTeacher = null;
+    let teacherClasses = [];
+    let currentAttendance = {};
+    let currentGrades = {};
+    let isClassTutor = false;
+    let currentPeriod = null;
+    let currentPeriodData = {};
+    let periodGradesTable = [];
+
+    // --- FONCTION POUR AFFICHER LA PHOTO DE L'ENSEIGNANT ---
+    function displayTeacherPhoto(photoURL, elementId) {
+        const element = document.getElementById(elementId);
+        if (!element) return;
+        
+        if (photoURL) {
+            element.innerHTML = `<img src="${photoURL}" style="width: 100%; height: 100%; object-fit: cover;">`;
+        } else {
+            element.innerHTML = '<i class="fas fa-user-tie"></i>';
+        }
+    }
+
+    // --- FONCTION POUR AFFICHER LA PHOTO DANS L'EN-TÊTE ---
+    function displayTeacherPhotoHeader(photoURL) {
+        const headerElement = document.getElementById('teacher-photo-header');
+        if (!headerElement) return;
+        
+        if (photoURL) {
+            headerElement.innerHTML = `<img src="${photoURL}" class="teacher-photo-header">`;
+        } else {
+            headerElement.innerHTML = '<div class="photo-placeholder-header"><i class="fas fa-user-tie"></i></div>';
+        }
+    }
+
+    // --- Gestion des onglets de connexion ---
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.tab, .tab-content').forEach(el => el.classList.remove('active'));
+            tab.classList.add('active');
+            document.getElementById(tab.dataset.tab + '-tab').classList.add('active');
+            document.getElementById('login-alert').classList.add('hidden');
+        });
+    });
+
+    // --- Authentification ---
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            const q = query(collection(db, 'teachers'), where('uid', '==', user.uid));
+            const snap = await getDocs(q);
+            
+            if (!snap.empty) {
+                currentTeacher = { id: snap.docs[0].id, ...snap.docs[0].data() };
+                document.getElementById('login-overlay').classList.add('hidden');
+                document.getElementById('app-root').classList.remove('hidden');
+                
+                displayTeacherPhoto(currentTeacher.photoURL, 'teacher-profile-avatar');
+                displayTeacherPhoto(currentTeacher.photoURL, 'profile-page-avatar');
+                displayTeacherPhotoHeader(currentTeacher.photoURL);
+                
+                await loadTeacherClasses();
+                await checkIfClassTutor();
+                initializePortal();
+            } else {
+                await signOut(auth);
+                showLoginAlert("Accès refusé. Votre compte n'est pas reconnu.", "error");
+            }
+        } else {
+            document.getElementById('login-overlay').classList.remove('hidden');
+            document.getElementById('app-root').classList.add('hidden');
+        }
+    });
+
+    // --- Vérifier si l'enseignant est titulaire d'une classe ---
+    async function checkIfClassTutor() {
+        try {
+            const tutorQuery = query(collection(db, 'class_tutors'), where('teacherId', '==', currentTeacher.id));
+            const tutorSnap = await getDocs(tutorQuery);
+            
+            isClassTutor = !tutorSnap.empty;
+            
+            const proclamationNavItem = document.getElementById('proclamation-nav-item');
+            if (isClassTutor) {
+                proclamationNavItem.classList.remove('hidden');
+            } else {
+                proclamationNavItem.classList.add('hidden');
+            }
+            
+        } catch (error) {
+            console.error('Erreur vérification statut titulaire:', error);
+            isClassTutor = false;
+        }
+    }
+
+    // --- Charger les classes de l'enseignant ---
+    async function loadTeacherClasses() {
+        try {
+            let classesQuery = query(collection(db, 'teacher_classes'), where('teacherMatricule', '==', currentTeacher.matricule));
+            let classesSnap = await getDocs(classesQuery);
+            
+            if (classesSnap.empty) {
+                classesQuery = query(collection(db, 'teacher_classes'), where('teacherId', '==', currentTeacher.id));
+                classesSnap = await getDocs(classesQuery);
+            }
+
+            if (classesSnap.empty) {
+                if (currentTeacher.classes && currentTeacher.classes.length > 0) {
+                    teacherClasses = currentTeacher.classes;
+                } else {
+                    teacherClasses = currentTeacher.subjects.map(subject => ({
+                        className: `Classe ${subject}`,
+                        subject: subject,
+                        level: 'Non spécifié'
+                    }));
+                }
+            } else {
+                teacherClasses = classesSnap.docs.map(doc => doc.data());
+            }
+            
+        } catch (error) {
+            console.error('Erreur lors du chargement des classes:', error);
+            teacherClasses = currentTeacher.subjects.map(subject => ({
+                className: `Classe ${subject}`,
+                subject: subject,
+                level: 'Non spécifié'
+            }));
+        }
+    }
+
+    // --- Connexion avec matricule enseignant ---
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const matricule = document.getElementById('login-matricule').value;
+        const password = document.getElementById('login-password').value;
+        
+        showLoginAlert("Connexion en cours...", "info");
+        
+        try {
+            const q = query(collection(db, 'teachers'), where('matricule', '==', matricule));
+            const teacherSnap = await getDocs(q);
+            
+            if (teacherSnap.empty) {
+                showLoginAlert('Matricule enseignant inconnu', 'error');
+                return;
+            }
+            
+            const teacherData = teacherSnap.docs[0].data();
+            
+            if (!teacherData.personalEmail) {
+                showLoginAlert('Veuillez d\'abord activer votre compte avec votre email personnel', 'error');
+                document.querySelector('.tab[data-tab="register"]').click();
+                return;
+            }
+            
+            await signInWithEmailAndPassword(auth, teacherData.personalEmail, password);
+            showLoginAlert('Connexion réussie!', 'success');
+            
+        } catch (error) {
+            console.error('Erreur de connexion:', error);
+            if (error.code === 'auth/user-not-found') {
+                showLoginAlert('Aucun compte trouvé avec cet email', 'error');
+            } else if (error.code === 'auth/wrong-password') {
+                showLoginAlert('Mot de passe incorrect', 'error');
+            } else {
+                showLoginAlert('Erreur de connexion: ' + error.message, 'error');
+            }
+        }
+    });
+
+    // --- Activation de compte avec matricule enseignant ---
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const matricule = document.getElementById('register-matricule').value;
+        const email = document.getElementById('register-email').value;
+        const password = document.getElementById('register-password').value;
+        const confirmPassword = document.getElementById('register-confirm-password').value;
+        
+        if (password !== confirmPassword) {
+            showLoginAlert('Les mots de passe ne correspondent pas', 'error');
+            return;
+        }
+        
+        if (password.length < 6) {
+            showLoginAlert('Le mot de passe doit contenir au moins 6 caractères', 'error');
+            return;
+        }
+        
+        showLoginAlert("Activation du compte en cours...", "info");
+        
+        try {
+            const q = query(collection(db, 'teachers'), where('matricule', '==', matricule));
+            const teacherSnap = await getDocs(q);
+            
+            if (teacherSnap.empty) {
+                showLoginAlert('Matricule enseignant inconnu. Veuillez vérifier votre matricule.', 'error');
+                return;
+            }
+            
+            const teacherDoc = teacherSnap.docs[0];
+            const teacherData = teacherDoc.data();
+            
+            if (teacherData.personalEmail) {
+                showLoginAlert('Ce compte est déjà activé. Veuillez vous connecter.', 'error');
+                document.querySelector('.tab[data-tab="login"]').click();
+                return;
+            }
+            
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+            
+            await updateDoc(doc(db, 'teachers', teacherDoc.id), {
+                personalEmail: email,
+                uid: user.uid,
+                accountActivated: true,
+                activatedAt: new Date()
+            });
+            
+            showLoginAlert('Compte activé avec succès! Vous pouvez maintenant vous connecter.', 'success');
+            document.querySelector('.tab[data-tab="login"]').click();
+            document.getElementById('register-form').reset();
+            
+        } catch (error) {
+            console.error('Erreur d\'activation:', error);
+            if (error.code === 'auth/email-already-in-use') {
+                showLoginAlert('Cet email est déjà utilisé par un autre compte', 'error');
+            } else if (error.code === 'auth/invalid-email') {
+                showLoginAlert('Format d\'email invalide', 'error');
+            } else {
+                showLoginAlert('Erreur lors de l\'activation du compte: ' + error.message, 'error');
+            }
+        }
+    });
+
+    document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+
+    // --- Initialisation du portail ---
+    function initializePortal() {
+        document.getElementById('teacher-name-header').textContent = currentTeacher.fullName;
+        document.getElementById('teacher-fullname').textContent = currentTeacher.fullName;
+        document.getElementById('teacher-subjects').textContent = `Matières: ${currentTeacher.subjects.join(', ')}`;
+        document.getElementById('teacher-matricule').textContent = `Matricule: ${currentTeacher.matricule}`;
+        
+        document.getElementById('profile-matricule').value = currentTeacher.matricule;
+        document.getElementById('profile-fullname').value = currentTeacher.fullName;
+        document.getElementById('profile-subjects').value = currentTeacher.subjects.join(', ');
+        document.getElementById('profile-classes').value = teacherClasses.map(c => c.className || c).join(', ');
+        document.getElementById('profile-email').value = currentTeacher.personalEmail || 'Non défini';
+        document.getElementById('profile-createdAt').value = currentTeacher.createdAt ? 
+            new Date(currentTeacher.createdAt.toDate()).toLocaleDateString('fr-FR') : 'Non spécifiée';
+        
+        loadDashboardData();
+        loadClassesData();
+        loadStudentsData();
+        loadClassSelects();
+        loadScheduleData();
+        
+        // Initialiser les sélecteurs de période
+        initializePeriodSelectors();
+        
+        // Initialiser la date d'aujourd'hui
+        const today = new Date().toISOString().split('T')[0];
+        if (document.getElementById('attendance-date')) {
+            document.getElementById('attendance-date').value = today;
+        }
+        if (document.getElementById('homework-due-date')) {
+            document.getElementById('homework-due-date').value = today;
+        }
+        if (document.getElementById('period-evaluation-date')) {
+            document.getElementById('period-evaluation-date').value = today;
+        }
+    }
+
+    // --- Initialiser les sélecteurs de période ---
+    function initializePeriodSelectors() {
+        // Remplir les sélecteurs de classe pour les périodes
+        const periodClassSelect = document.getElementById('period-class-select');
+        periodClassSelect.innerHTML = '<option value="">-- Choisir une classe --</option>';
+        
+        teacherClasses.forEach(classData => {
+            const className = classData.className || classData;
+            const subject = classData.subject || currentTeacher.subjects[0];
+            periodClassSelect.innerHTML += `<option value="${className}">${className} - ${subject}</option>`;
+        });
+        
+        // Remplir les matières
+        const periodSubjectSelect = document.getElementById('period-subject');
+        periodSubjectSelect.innerHTML = '<option value="">-- Choisir une matière --</option>';
+        currentTeacher.subjects.forEach(subject => {
+            periodSubjectSelect.innerHTML += `<option value="${subject}">${subject}</option>`;
+        });
+        
+        // Événement pour charger les élèves
+        document.getElementById('load-students-btn').addEventListener('click', loadStudentsForPeriod);
+        
+        // Événements pour les boutons de période
+        document.getElementById('save-period-grades-btn').addEventListener('click', savePeriodGrades);
+        document.getElementById('update-period-grades-btn').addEventListener('click', updatePeriodGrades);
+        document.getElementById('clear-period-table-btn').addEventListener('click', clearPeriodTable);
+        document.getElementById('publish-to-parents-btn').addEventListener('click', publishToParents);
+        document.getElementById('publish-to-tutors-btn').addEventListener('click', publishToTutors);
+        
+        // Événements pour la page proclamation
+        document.getElementById('load-proclamation-data-btn').addEventListener('click', loadProclamationData);
+        document.getElementById('download-excel-btn').addEventListener('click', downloadProclamationExcel);
+        document.getElementById('download-word-btn').addEventListener('click', downloadProclamationWord);
+    }
+
+    // --- Sélectionner une période ---
+    window.selectPeriod = function(period) {
+        currentPeriod = period;
+        
+        // Mettre à jour l'UI
+        document.querySelectorAll('.period-option').forEach(option => {
+            option.classList.remove('selected');
+        });
+        document.querySelector(`.period-option[data-period="${period}"]`).classList.add('selected');
+        
+        // Afficher la description de la période
+        updatePeriodDescription(period);
+        
+        // Afficher le formulaire
+        document.getElementById('period-form').classList.remove('hidden');
+        document.getElementById('excel-table-container').classList.add('hidden');
+        document.getElementById('saved-grades-container').classList.add('hidden');
+        document.getElementById('publication-section').classList.add('hidden');
+        
+        // Charger les notes enregistrées pour cette période
+        loadSavedPeriodGrades();
+    };
+
+    // --- Mettre à jour la description de la période ---
+    function updatePeriodDescription(period) {
+        const descriptions = {
+            'P1': 'Première Période - Évaluations continues',
+            'P2': 'Deuxième Période - Évaluations continues',
+            'EXAM_S1': 'Examen du Semestre 1',
+            'TOTAL_S1': 'Total Semestre 1 (P1 + P2 + EXAM_S1)',
+            'P3': 'Troisième Période - Évaluations continues',
+            'P4': 'Quatrième Période - Évaluations continues',
+            'EXAM_S2': 'Examen du Semestre 2',
+            'TOTAL_S2': 'Total Semestre 2 (P3 + P4 + EXAM_S2)',
+            'TOTAL_GENERAL': 'Total Général (Moyenne des deux semestres)'
+        };
+        
+        const periodDescription = document.getElementById('period-description');
+        periodDescription.innerHTML = `
+            <h4>${descriptions[period]}</h4>
+            <p><strong>Règles de calcul :</strong></p>
+            <ul>
+                ${getPeriodCalculationRules(period)}
+            </ul>
+        `;
+    }
+
+    // --- Obtenir les règles de calcul pour une période ---
+    function getPeriodCalculationRules(period) {
+        switch(period) {
+            case 'P1':
+            case 'P2':
+            case 'P3':
+            case 'P4':
+                return '<li>Saisie directe des notes des évaluations continues</li><li>CM = Points maximum</li><li>CO = Points obtenus par l\'élève</li>';
+            case 'EXAM_S1':
+            case 'EXAM_S2':
+                return '<li>Notes d\'examen</li><li>CM = Points maximum de l\'examen</li><li>CO = Points obtenus à l\'examen</li>';
+            case 'TOTAL_S1':
+                return '<li>Total = P1 + P2 + EXAM_S1</li><li>CM Total = Somme des CM des 3 périodes</li><li>CO Total = Somme des CO des 3 périodes</li><li>Pourcentage = (CO Total / CM Total) × 100</li>';
+            case 'TOTAL_S2':
+                return '<li>Total = P3 + P4 + EXAM_S2</li><li>CM Total = Somme des CM des 3 périodes</li><li>CO Total = Somme des CO des 3 périodes</li><li>Pourcentage = (CO Total / CM Total) × 100</li>';
+            case 'TOTAL_GENERAL':
+                return '<li>Total Général = Moyenne de TOTAL_S1 et TOTAL_S2</li><li>CM Final = (CM S1 + CM S2) / 2</li><li>CO Final = (CO S1 + CO S2) / 2</li><li>Pourcentage Final = (CO Final / CM Final) × 100</li>';
+            default:
+                return '';
+        }
+    }
+
+    // --- Charger les élèves pour la période sélectionnée ---
+    async function loadStudentsForPeriod() {
+        const className = document.getElementById('period-class-select').value;
+        const subject = document.getElementById('period-subject').value;
+        
+        if (!className || !subject) {
+            showAlert('Veuillez sélectionner une classe et une matière', 'error');
+            return;
+        }
+        
+        try {
+            const studentsQuery = query(collection(db, 'students'), where('class', '==', className));
+            const studentsSnap = await getDocs(studentsQuery);
+            
+            periodGradesTable = [];
+            
+            let html = '';
+            let counter = 1;
+            
+            studentsSnap.forEach(doc => {
+                const student = doc.data();
+                const studentId = `${counter}`;
+                
+                periodGradesTable.push({
+                    id: studentId,
+                    matricule: student.matricule,
+                    fullName: student.fullName,
+                    grade: 0,
+                    maxPoints: parseFloat(document.getElementById('period-max-points').value),
+                    remark: '',
+                    percentage: 0
+                });
+                
+                html += `
+                    <tr>
+                        <td>${counter}</td>
+                        <td>${student.matricule}</td>
+                        <td>${student.fullName}</td>
+                        <td class="editable-cell" data-id="${studentId}" data-field="grade">
+                            <input type="number" class="grade-input" 
+                                   value="0" 
+                                   min="0" 
+                                   max="${document.getElementById('period-max-points').value}"
+                                   step="0.5"
+                                   onchange="updatePeriodGrade('${studentId}', 'grade', this.value)">
+                        </td>
+                        <td>${document.getElementById('period-max-points').value}</td>
+                        <td class="percentage-cell" id="percentage-${studentId}">0%</td>
+                        <td class="editable-cell" data-id="${studentId}" data-field="remark">
+                            <input type="text" class="form-control" 
+                                   placeholder="Remarques" 
+                                   onchange="updatePeriodGrade('${studentId}', 'remark', this.value)">
+                        </td>
+                    </tr>
+                `;
+                counter++;
+            });
+            
+            document.getElementById('grades-table-body').innerHTML = html;
+            document.getElementById('excel-table-container').classList.remove('hidden');
+            
+        } catch (error) {
+            console.error('Erreur chargement élèves:', error);
+            showAlert('Erreur lors du chargement des élèves', 'error');
+        }
+    }
+
+    // --- Mettre à jour une note dans le tableau ---
+    window.updatePeriodGrade = function(studentId, field, value) {
+        const studentIndex = periodGradesTable.findIndex(s => s.id === studentId);
+        if (studentIndex !== -1) {
+            if (field === 'grade') {
+                const grade = parseFloat(value) || 0;
+                const maxPoints = periodGradesTable[studentIndex].maxPoints;
+                periodGradesTable[studentIndex].grade = grade;
+                periodGradesTable[studentIndex].percentage = maxPoints > 0 ? (grade / maxPoints) * 100 : 0;
+                
+                // Mettre à jour l'affichage du pourcentage
+                const percentageCell = document.getElementById(`percentage-${studentId}`);
+                if (percentageCell) {
+                    percentageCell.textContent = `${periodGradesTable[studentIndex].percentage.toFixed(2)}%`;
+                }
+            } else if (field === 'remark') {
+                periodGradesTable[studentIndex].remark = value;
+            }
+        }
+    };
+
+    // --- Enregistrer les notes de la période ---
+    async function savePeriodGrades() {
+        if (!currentPeriod || periodGradesTable.length === 0) {
+            showAlert('Aucune note à enregistrer', 'error');
+            return;
+        }
+        
+        const className = document.getElementById('period-class-select').value;
+        const subject = document.getElementById('period-subject').value;
+        const gradeType = document.getElementById('period-grade-type').value;
+        const description = document.getElementById('period-evaluation-description').value;
+        const evaluationDate = document.getElementById('period-evaluation-date').value;
+        
+        if (!className || !subject) {
+            showAlert('Veuillez sélectionner une classe et une matière', 'error');
+            return;
+        }
+        
+        try {
+            const periodData = {
+                teacherId: currentTeacher.id,
+                teacherName: currentTeacher.fullName,
+                period: currentPeriod,
+                className: className,
+                subject: subject,
+                gradeType: gradeType,
+                description: description,
+                evaluationDate: new Date(evaluationDate),
+                maxPoints: parseFloat(document.getElementById('period-max-points').value),
+                grades: periodGradesTable.map(grade => ({
+                    studentMatricule: grade.matricule,
+                    studentName: grade.fullName,
+                    grade: grade.grade,
+                    remark: grade.remark,
+                    percentage: grade.percentage
+                })),
+                totalCM: periodGradesTable.reduce((sum, grade) => sum + grade.maxPoints, 0),
+                totalCO: periodGradesTable.reduce((sum, grade) => sum + grade.grade, 0),
+                overallPercentage: periodGradesTable.reduce((sum, grade) => sum + grade.percentage, 0) / periodGradesTable.length,
+                createdAt: new Date(),
+                updatedAt: new Date()
+            };
+            
+            // Vérifier si des notes existent déjà pour cette période
+            const existingQuery = query(
+                collection(db, 'period_grades'),
+                where('teacherId', '==', currentTeacher.id),
+                where('period', '==', currentPeriod),
+                where('className', '==', className),
+                where('subject', '==', subject)
+            );
+            
+            const existingSnap = await getDocs(existingQuery);
+            
+            if (existingSnap.empty) {
+                // Nouvelle entrée
+                await addDoc(collection(db, 'period_grades'), periodData);
+                showAlert('Notes enregistrées avec succès pour cette période', 'success');
+            } else {
+                // Mise à jour
+                const docId = existingSnap.docs[0].id;
+                await updateDoc(doc(db, 'period_grades', docId), periodData);
+                showAlert('Notes mises à jour avec succès', 'success');
+            }
+            
+            // Afficher la section publication
+            document.getElementById('publication-section').classList.remove('hidden');
+            
+            // Recharger les notes enregistrées
+            loadSavedPeriodGrades();
+            
+        } catch (error) {
+            console.error('Erreur enregistrement notes:', error);
+            showAlert('Erreur lors de l\'enregistrement des notes', 'error');
+        }
+    }
+
+    // --- Mettre à jour le tableau des notes ---
+    async function updatePeriodGrades() {
+        // Recalculer tous les pourcentages
+        periodGradesTable.forEach(student => {
+            if (student.maxPoints > 0) {
+                student.percentage = (student.grade / student.maxPoints) * 100;
+            }
+        });
+        
+        // Mettre à jour l'affichage
+        periodGradesTable.forEach(student => {
+            const percentageCell = document.getElementById(`percentage-${student.id}`);
+            if (percentageCell) {
+                percentageCell.textContent = `${student.percentage.toFixed(2)}%`;
+            }
+        });
+        
+        showAlert('Tableau mis à jour avec succès', 'success');
+    }
+
+    // --- Effacer le tableau ---
+    function clearPeriodTable() {
+        if (confirm('Êtes-vous sûr de vouloir effacer toutes les notes du tableau ?')) {
+            periodGradesTable = [];
+            document.getElementById('grades-table-body').innerHTML = '';
+            showAlert('Tableau effacé avec succès', 'success');
+        }
+    }
+
+    // --- Charger les notes enregistrées pour la période ---
+    async function loadSavedPeriodGrades() {
+        const className = document.getElementById('period-class-select').value;
+        const subject = document.getElementById('period-subject').value;
+        
+        if (!className || !subject || !currentPeriod) return;
+        
+        try {
+            const gradesQuery = query(
+                collection(db, 'period_grades'),
+                where('teacherId', '==', currentTeacher.id),
+                where('period', '==', currentPeriod),
+                where('className', '==', className),
+                where('subject', '==', subject)
+            );
+            
+            const gradesSnap = await getDocs(gradesQuery);
+            
+            const container = document.getElementById('saved-grades-container');
+            const tableContainer = document.getElementById('saved-grades-table-container');
+            
+            if (gradesSnap.empty) {
+                container.classList.add('hidden');
+                return;
+            }
+            
+            container.classList.remove('hidden');
+            
+            const gradeData = gradesSnap.docs[0].data();
+            const evaluationDate = gradeData.evaluationDate.toDate().toLocaleDateString('fr-FR');
+            
+            let html = `
+                <div class="period-summary">
+                    <div class="summary-card">
+                        <h4>Date d'évaluation</h4>
+                        <div class="value">${evaluationDate}</div>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Total CM</h4>
+                        <div class="value">${gradeData.totalCM}</div>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Total CO</h4>
+                        <div class="value">${gradeData.totalCO.toFixed(2)}</div>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Pourcentage Général</h4>
+                        <div class="value">${gradeData.overallPercentage.toFixed(2)}%</div>
+                    </div>
+                </div>
+                
+                <div class="table-container" style="margin-top: 20px;">
+                    <table class="excel-like-table">
+                        <thead>
+                            <tr>
+                                <th>Élève</th>
+                                <th>Note (CO)</th>
+                                <th>CM Max</th>
+                                <th>Pourcentage</th>
+                                <th>Remarques</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            gradeData.grades.forEach(grade => {
+                html += `
+                    <tr>
+                        <td>${grade.studentName}</td>
+                        <td>${grade.grade}</td>
+                        <td>${gradeData.maxPoints}</td>
+                        <td>${grade.percentage.toFixed(2)}%</td>
+                        <td>${grade.remark || '-'}</td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table></div>';
+            tableContainer.innerHTML = html;
+            
+        } catch (error) {
+            console.error('Erreur chargement notes enregistrées:', error);
+        }
+    }
+
+    // --- Publier aux parents ---
+    async function publishToParents() {
+        const className = document.getElementById('period-class-select').value;
+        const subject = document.getElementById('period-subject').value;
+        const message = document.getElementById('publication-message').value;
+        
+        if (!currentPeriod || !className || !subject) {
+            showAlert('Veuillez d\'abord enregistrer les notes', 'error');
+            return;
+        }
+        
+        try {
+            const gradesQuery = query(
+                collection(db, 'period_grades'),
+                where('teacherId', '==', currentTeacher.id),
+                where('period', '==', currentPeriod),
+                where('className', '==', className),
+                where('subject', '==', subject)
+            );
+            
+            const gradesSnap = await getDocs(gradesQuery);
+            
+            if (gradesSnap.empty) {
+                showAlert('Aucune note à publier', 'error');
+                return;
+            }
+            
+            const gradeData = gradesSnap.docs[0].data();
+            
+            // Publier dans la collection parent_grades
+            const publicationData = {
+                ...gradeData,
+                destination: 'parents',
+                message: message,
+                publishedAt: new Date(),
+                publishedBy: currentTeacher.fullName
+            };
+            
+            await addDoc(collection(db, 'parent_grades'), publicationData);
+            
+            showAlert('Notes publiées aux parents avec succès', 'success');
+            
+        } catch (error) {
+            console.error('Erreur publication parents:', error);
+            showAlert('Erreur lors de la publication aux parents', 'error');
+        }
+    }
+
+    // --- Publier aux titulaires ---
+    async function publishToTutors() {
+        const className = document.getElementById('period-class-select').value;
+        const subject = document.getElementById('period-subject').value;
+        const message = document.getElementById('publication-message').value;
+        
+        if (!currentPeriod || !className || !subject) {
+            showAlert('Veuillez d\'abord enregistrer les notes', 'error');
+            return;
+        }
+        
+        try {
+            const gradesQuery = query(
+                collection(db, 'period_grades'),
+                where('teacherId', '==', currentTeacher.id),
+                where('period', '==', currentPeriod),
+                where('className', '==', className),
+                where('subject', '==', subject)
+            );
+            
+            const gradesSnap = await getDocs(gradesQuery);
+            
+            if (gradesSnap.empty) {
+                showAlert('Aucune note à publier', 'error');
+                return;
+            }
+            
+            const gradeData = gradesSnap.docs[0].data();
+            
+            // Publier dans la collection tutor_grades
+            const publicationData = {
+                ...gradeData,
+                destination: 'tutors',
+                message: message,
+                publishedAt: new Date(),
+                publishedBy: currentTeacher.fullName
+            };
+            
+            await addDoc(collection(db, 'tutor_grades'), publicationData);
+            
+            showAlert('Notes publiées aux titulaires avec succès', 'success');
+            
+        } catch (error) {
+            console.error('Erreur publication titulaires:', error);
+            showAlert('Erreur lors de la publication aux titulaires', 'error');
+        }
+    }
+
+    // --- Charger les données de proclamation (ESPACE TITULAIRE) ---
+    async function loadProclamationData() {
+        const className = document.getElementById('proclamation-class').value;
+        const period = document.getElementById('proclamation-period').value;
+        
+        if (!className) {
+            showAlert('Veuillez sélectionner une classe', 'error');
+            return;
+        }
+        
+        try {
+            // Afficher les informations sur la période
+            document.getElementById('period-info').classList.remove('hidden');
+            document.getElementById('selected-period-name').textContent = getPeriodName(period);
+            document.getElementById('period-calculation-info').textContent = getPeriodCalculationInfo(period);
+            
+            // Récupérer tous les élèves de la classe
+            const studentsQuery = query(collection(db, 'students'), where('class', '==', className));
+            const studentsSnap = await getDocs(studentsQuery);
+            
+            if (studentsSnap.empty) {
+                showAlert('Aucun élève trouvé dans cette classe', 'error');
+                return;
+            }
+            
+            // Récupérer tous les cours publiés pour cette classe et période
+            const tutorGradesQuery = query(
+                collection(db, 'tutor_grades'),
+                where('className', '==', className),
+                where('period', '==', period)
+            );
+            
+            const tutorGradesSnap = await getDocs(tutorGradesQuery);
+            
+            if (tutorGradesSnap.empty) {
+                document.getElementById('proclamation-table-card').classList.add('hidden');
+                showAlert('Aucune cote publiée pour cette classe et période', 'info');
+                return;
+            }
+            
+            // Organiser les données par cours
+            const coursesData = {};
+            const students = studentsSnap.docs.map(doc => doc.data());
+            
+            tutorGradesSnap.forEach(doc => {
+                const gradeData = doc.data();
+                const courseName = gradeData.subject;
+                
+                if (!coursesData[courseName]) {
+                    coursesData[courseName] = {
+                        teacherName: gradeData.teacherName,
+                        description: gradeData.description,
+                        grades: {}
+                    };
+                }
+                
+                // Organiser les notes par élève
+                gradeData.grades.forEach(grade => {
+                    if (!coursesData[courseName].grades[grade.studentMatricule]) {
+                        coursesData[courseName].grades[grade.studentMatricule] = {
+                            studentName: grade.studentName,
+                            cm: gradeData.maxPoints,
+                            co: grade.grade,
+                            percentage: grade.percentage
+                        };
+                    }
+                });
+            });
+            
+            // Calculer les totaux et pourcentages pour chaque élève
+            const studentResults = calculateStudentResults(students, coursesData, period);
+            
+            // Afficher le tableau
+            displayTutorProclamationTable(students, coursesData, studentResults, period);
+            
+            // Stocker les données pour l'export
+            window.proclamationData = {
+                className: className,
+                period: period,
+                coursesData: coursesData,
+                studentResults: studentResults,
+                students: students
+            };
+            
+        } catch (error) {
+            console.error('Erreur chargement proclamation:', error);
+            showAlert('Erreur lors du chargement des données', 'error');
+        }
+    }
+
+    // --- Calculer les résultats des élèves ---
+    function calculateStudentResults(students, coursesData, period) {
+        const studentResults = {};
+        
+        students.forEach(student => {
+            const matricule = student.matricule;
+            studentResults[matricule] = {
+                fullName: student.fullName,
+                courses: {},
+                totalCM: 0,
+                totalCO: 0,
+                overallPercentage: 0
+            };
+            
+            // Pour chaque cours, récupérer les notes
+            Object.keys(coursesData).forEach(courseName => {
+                const course = coursesData[courseName];
+                const studentGrade = course.grades[matricule];
+                
+                if (studentGrade) {
+                    studentResults[matricule].courses[courseName] = {
+                        cm: studentGrade.cm,
+                        co: studentGrade.co,
+                        percentage: studentGrade.percentage
+                    };
+                    
+                    studentResults[matricule].totalCM += studentGrade.cm;
+                    studentResults[matricule].totalCO += studentGrade.co;
+                } else {
+                    // Si l'élève n'a pas de note pour ce cours
+                    studentResults[matricule].courses[courseName] = {
+                        cm: 0,
+                        co: 0,
+                        percentage: 0
+                    };
+                }
+            });
+            
+            // Calculer le pourcentage global
+            if (studentResults[matricule].totalCM > 0) {
+                studentResults[matricule].overallPercentage = 
+                    (studentResults[matricule].totalCO / studentResults[matricule].totalCM) * 100;
+            }
+        });
+        
+        // Trier les élèves par pourcentage décroissant
+        const sortedStudents = Object.values(studentResults).sort((a, b) => 
+            b.overallPercentage - a.overallPercentage
+        );
+        
+        // Ajouter le classement
+        sortedStudents.forEach((student, index) => {
+            student.ranking = index + 1;
+        });
+        
+        return sortedStudents;
+    }
+
+    // --- Afficher le tableau de proclamation pour le titulaire ---
+    function displayTutorProclamationTable(students, coursesData, studentResults, period) {
+        const container = document.getElementById('proclamation-table-container');
+        const tableCard = document.getElementById('proclamation-table-card');
+        
+        tableCard.classList.remove('hidden');
+        
+        const courseNames = Object.keys(coursesData);
+        
+        let html = `
+            <table class="proclamation-table">
+                <thead>
+                    <tr>
+                        <th rowspan="3">Classement</th>
+                        <th rowspan="3">Matricule</th>
+                        <th rowspan="3">Nom Complet</th>
+        `;
+        
+        // En-têtes des cours (sur 2 lignes)
+        courseNames.forEach(courseName => {
+            html += `<th colspan="2">${courseName}</th>`;
+        });
+        
+        html += `
+                        <th colspan="3">Totaux</th>
+                    </tr>
+                    <tr>
+        `;
+        
+        // Sous-en-têtes CM et CO pour chaque cours
+        courseNames.forEach(() => {
+            html += `
+                <th>CM</th>
+                <th>CO</th>
+            `;
+        });
+        
+        html += `
+                <th>Total CM</th>
+                <th>Total CO</th>
+                <th>Pourcentage</th>
+            </tr>
+        `;
+        
+        // Informations sur les enseignants
+        html += `<tr><td colspan="3"><small>Enseignants:</small></td>`;
+        
+        courseNames.forEach(courseName => {
+            const teacher = coursesData[courseName].teacherName;
+            html += `<td colspan="2"><small>${teacher}</small></td>`;
+        });
+        
+        html += `<td colspan="3"></td></tr></thead><tbody>`;
+        
+        // Données des élèves triés par classement
+        studentResults.forEach(student => {
+            // Trouver le matricule correspondant
+            const studentData = students.find(s => s.fullName === student.fullName);
+            const matricule = studentData ? studentData.matricule : '';
+            
+            let rankingClass = '';
+            if (student.ranking === 1) rankingClass = 'ranking-1';
+            else if (student.ranking === 2) rankingClass = 'ranking-2';
+            else if (student.ranking === 3) rankingClass = 'ranking-3';
+            
+            html += `
+                <tr>
+                    <td><span class="ranking-badge ${rankingClass}">${student.ranking}</span></td>
+                    <td>${matricule}</td>
+                    <td>${student.fullName}</td>
+            `;
+            
+            // Notes par cours
+            courseNames.forEach(courseName => {
+                const course = student.courses[courseName];
+                const percentageClass = course.percentage >= 50 ? 'grade-pass' : 'grade-fail';
+                
+                html += `
+                    <td>${course.cm}</td>
+                    <td class="${percentageClass}">${course.co.toFixed(2)}</td>
+                `;
+            });
+            
+            // Totaux
+            const overallPercentageClass = student.overallPercentage >= 50 ? 'grade-pass' : 'grade-fail';
+            
+            html += `
+                    <td><strong>${student.totalCM.toFixed(2)}</strong></td>
+                    <td><strong>${student.totalCO.toFixed(2)}</strong></td>
+                    <td class="${overallPercentageClass}"><strong>${student.overallPercentage.toFixed(2)}%</strong></td>
+                </tr>
+            `;
+        });
+        
+        // Ligne de moyennes de classe
+        html += `<tr class="total-row"><td colspan="3"><strong>MOYENNE CLASSE</strong></td>`;
+        
+        // Moyennes par cours
+        courseNames.forEach(courseName => {
+            const courseAverages = calculateCourseAverage(studentResults, courseName);
+            const percentageClass = courseAverages.percentage >= 50 ? 'grade-pass' : 'grade-fail';
+            
+            html += `
+                <td><strong>${courseAverages.cm.toFixed(2)}</strong></td>
+                <td class="${percentageClass}"><strong>${courseAverages.co.toFixed(2)}</strong></td>
+            `;
+        });
+        
+        // Moyennes totales
+        const classAverages = calculateClassAverages(studentResults);
+        const overallPercentageClass = classAverages.percentage >= 50 ? 'grade-pass' : 'grade-fail';
+        
+        html += `
+                <td><strong>${classAverages.totalCM.toFixed(2)}</strong></td>
+                <td><strong>${classAverages.totalCO.toFixed(2)}</strong></td>
+                <td class="${overallPercentageClass}"><strong>${classAverages.percentage.toFixed(2)}%</strong></td>
+            </tr>
+        `;
+        
+        html += '</tbody></table>';
+        container.innerHTML = html;
+    }
+
+    // --- Calculer les moyennes par cours ---
+    function calculateCourseAverage(studentResults, courseName) {
+        let totalCM = 0;
+        let totalCO = 0;
+        let count = 0;
+        
+        studentResults.forEach(student => {
+            const course = student.courses[courseName];
+            if (course) {
+                totalCM += course.cm;
+                totalCO += course.co;
+                count++;
+            }
+        });
+        
+        const avgCM = count > 0 ? totalCM / count : 0;
+        const avgCO = count > 0 ? totalCO / count : 0;
+        const percentage = avgCM > 0 ? (avgCO / avgCM) * 100 : 0;
+        
+        return {
+            cm: avgCM,
+            co: avgCO,
+            percentage: percentage
+        };
+    }
+
+    // --- Calculer les moyennes de la classe ---
+    function calculateClassAverages(studentResults) {
+        let totalCM = 0;
+        let totalCO = 0;
+        let count = 0;
+        
+        studentResults.forEach(student => {
+            totalCM += student.totalCM;
+            totalCO += student.totalCO;
+            count++;
+        });
+        
+        const avgCM = count > 0 ? totalCM / count : 0;
+        const avgCO = count > 0 ? totalCO / count : 0;
+        const percentage = avgCM > 0 ? (avgCO / avgCM) * 100 : 0;
+        
+        return {
+            totalCM: avgCM,
+            totalCO: avgCO,
+            percentage: percentage
+        };
+    }
+
+    // --- Obtenir le nom de la période ---
+    function getPeriodName(period) {
+        const periodNames = {
+            'P1': 'Première Période',
+            'P2': 'Deuxième Période',
+            'EXAM_S1': 'Examen Semestre 1',
+            'TOTAL_S1': 'Total Semestre 1',
+            'P3': 'Troisième Période',
+            'P4': 'Quatrième Période',
+            'EXAM_S2': 'Examen Semestre 2',
+            'TOTAL_S2': 'Total Semestre 2',
+            'TOTAL_GENERAL': 'Total Général'
+        };
+        return periodNames[period] || period;
+    }
+
+    // --- Obtenir les informations de calcul de la période ---
+    function getPeriodCalculationInfo(period) {
+        switch(period) {
+            case 'TOTAL_S1':
+                return 'Calcul: Total = P1 + P2 + EXAM_S1 | CM Total = Somme des CM | CO Total = Somme des CO';
+            case 'TOTAL_S2':
+                return 'Calcul: Total = P3 + P4 + EXAM_S2 | CM Total = Somme des CM | CO Total = Somme des CO';
+            case 'TOTAL_GENERAL':
+                return 'Calcul: Total Général = Moyenne(TOTAL_S1, TOTAL_S2)';
+            default:
+                return 'Notes directes pour cette période';
+        }
+    }
+
+    // --- Exporter en Excel ---
+    async function downloadProclamationExcel() {
+        if (!window.proclamationData) {
+            showAlert('Veuillez d\'abord charger les données', 'error');
+            return;
+        }
+        
+        try {
+            const { className, period, coursesData, studentResults } = window.proclamationData;
+            const courseNames = Object.keys(coursesData);
+            
+            // Préparer les données pour Excel
+            const excelData = [];
+            
+            // En-tête principal
+            excelData.push([`PROCLAMATION DES NOTES - ${className}`]);
+            excelData.push([`Période: ${getPeriodName(period)}`]);
+            excelData.push([`Date d'export: ${new Date().toLocaleDateString('fr-FR')}`]);
+            excelData.push([]);
+            
+            // Informations sur les enseignants
+            excelData.push(['Enseignants:']);
+            courseNames.forEach(courseName => {
+                const teacher = coursesData[courseName].teacherName;
+                excelData.push([`${courseName}: ${teacher}`]);
+            });
+            excelData.push([]);
+            
+            // En-têtes de colonnes
+            const headers = ['Classement', 'Matricule', 'Nom Complet'];
+            courseNames.forEach(courseName => {
+                headers.push(`${courseName} CM`, `${courseName} CO`);
+            });
+            headers.push('Total CM', 'Total CO', 'Pourcentage');
+            excelData.push(headers);
+            
+            // Données des élèves
+            studentResults.forEach(student => {
+                const row = [
+                    student.ranking,
+                    studentResults.find(s => s.fullName === student.fullName)?.matricule || '',
+                    student.fullName
+                ];
+                
+                courseNames.forEach(courseName => {
+                    const course = student.courses[courseName];
+                    row.push(course.cm, course.co.toFixed(2));
+                });
+                
+                row.push(
+                    student.totalCM.toFixed(2),
+                    student.totalCO.toFixed(2),
+                    `${student.overallPercentage.toFixed(2)}%`
+                );
+                
+                excelData.push(row);
+            });
+            
+            // Ligne de moyennes
+            const averagesRow = ['MOYENNE CLASSE', '', ''];
+            courseNames.forEach(courseName => {
+                const courseAvg = calculateCourseAverage(studentResults, courseName);
+                averagesRow.push(courseAvg.cm.toFixed(2), courseAvg.co.toFixed(2));
+            });
+            
+            const classAvg = calculateClassAverages(studentResults);
+            averagesRow.push(
+                classAvg.totalCM.toFixed(2),
+                classAvg.totalCO.toFixed(2),
+                `${classAvg.percentage.toFixed(2)}%`
+            );
+            
+            excelData.push(averagesRow);
+            
+            // Créer le workbook
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(excelData);
+            
+            // Appliquer des styles
+            const range = XLSX.utils.decode_range(ws['!ref']);
+            for (let R = 0; R <= range.e.r; ++R) {
+                for (let C = 0; C <= range.e.c; ++C) {
+                    const cell_address = {c: C, r: R};
+                    const cell_ref = XLSX.utils.encode_cell(cell_address);
+                    
+                    if (R === 0) {
+                        // Titre principal
+                        ws[cell_ref].s = {
+                            font: { bold: true, sz: 16 },
+                            alignment: { horizontal: 'center' }
+                        };
+                    } else if (R >= 1 && R <= 3) {
+                        // Sous-titres
+                        ws[cell_ref].s = {
+                            font: { bold: true, sz: 12 },
+                            alignment: { horizontal: 'center' }
+                        };
+                    } else if (R === 4 + courseNames.length) {
+                        // En-têtes
+                        ws[cell_ref].s = {
+                            font: { bold: true, color: { rgb: "FFFFFF" } },
+                            fill: { fgColor: { rgb: "2C3E50" } },
+                            alignment: { horizontal: 'center' }
+                        };
+                    } else if (R === excelData.length - 1) {
+                        // Ligne de moyennes
+                        ws[cell_ref].s = {
+                            font: { bold: true },
+                            fill: { fgColor: { rgb: "BBDEFB" } }
+                        };
+                    }
+                }
+            }
+            
+            // Ajuster la largeur des colonnes
+            const colWidths = [];
+            for (let C = 0; C < headers.length; ++C) {
+                let maxLength = headers[C].length;
+                for (let R = 5 + courseNames.length; R < excelData.length; ++R) {
+                    const cellValue = excelData[R][C];
+                    if (cellValue && cellValue.toString().length > maxLength) {
+                        maxLength = cellValue.toString().length;
+                    }
+                }
+                colWidths.push({ wch: Math.min(maxLength + 2, 50) });
+            }
+            ws['!cols'] = colWidths;
+            
+            XLSX.utils.book_append_sheet(wb, ws, 'Proclamation');
+            
+            // Télécharger
+            const fileName = `Proclamation_${className}_${period}_${new Date().toISOString().split('T')[0]}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+            
+            showAlert('Fichier Excel téléchargé avec succès', 'success');
+            
+        } catch (error) {
+            console.error('Erreur export Excel:', error);
+            showAlert('Erreur lors de l\'export Excel', 'error');
+        }
+    }
+
+    // --- Exporter en Word ---
+    async function downloadProclamationWord() {
+        if (!window.proclamationData) {
+            showAlert('Veuillez d\'abord charger les données', 'error');
+            return;
+        }
+        
+        try {
+            const { className, period, coursesData, studentResults } = window.proclamationData;
+            const courseNames = Object.keys(coursesData);
+            
+            // Préparer le contenu Word
+            const docContent = [];
+            
+            // Titre principal
+            docContent.push({
+                text: `PROCLAMATION DES NOTES - ${className}`,
+                heading: 'Title',
+                alignment: 'center',
+                bold: true,
+                size: 24,
+                margin: [0, 0, 0, 20]
+            });
+            
+            docContent.push({
+                text: `Période: ${getPeriodName(period)}`,
+                alignment: 'center',
+                bold: true,
+                size: 14,
+                margin: [0, 0, 0, 10]
+            });
+            
+            docContent.push({
+                text: `Date: ${new Date().toLocaleDateString('fr-FR')}`,
+                alignment: 'center',
+                size: 12,
+                margin: [0, 0, 0, 20]
+            });
+            
+            // Informations sur les enseignants
+            docContent.push({
+                text: 'Enseignants:',
+                bold: true,
+                margin: [0, 0, 0, 10]
+            });
+            
+            courseNames.forEach(courseName => {
+                const teacher = coursesData[courseName].teacherName;
+                docContent.push({
+                    text: `• ${courseName}: ${teacher}`,
+                    margin: [0, 0, 0, 5]
+                });
+            });
+            
+            docContent.push({
+                text: '',
+                margin: [0, 0, 0, 20]
+            });
+            
+            // Tableau
+            const tableBody = [];
+            
+            // En-têtes du tableau
+            const tableHeaders = ['Classement', 'Matricule', 'Nom Complet'];
+            courseNames.forEach(courseName => {
+                tableHeaders.push(`${courseName} CM`, `${courseName} CO`);
+            });
+            tableHeaders.push('Total CM', 'Total CO', 'Pourcentage');
+            
+            tableBody.push(tableHeaders.map(header => ({ 
+                text: header, 
+                bold: true, 
+                fillColor: '#2c3e50', 
+                color: 'white', 
+                alignment: 'center' 
+            })));
+            
+            // Données des élèves
+            studentResults.forEach(student => {
+                const row = [
+                    { text: student.ranking.toString(), alignment: 'center' },
+                    studentResults.find(s => s.fullName === student.fullName)?.matricule || '',
+                    student.fullName
+                ];
+                
+                courseNames.forEach(courseName => {
+                    const course = student.courses[courseName];
+                    row.push(
+                        { text: course.cm.toString(), alignment: 'center' },
+                        { 
+                            text: course.co.toFixed(2), 
+                            alignment: 'center',
+                            color: course.percentage >= 50 ? '#2e7d32' : '#c62828'
+                        }
+                    );
+                });
+                
+                const overallPercentageClass = student.overallPercentage >= 50 ? '#2e7d32' : '#c62828';
+                
+                row.push(
+                    { text: student.totalCM.toFixed(2), alignment: 'center', bold: true },
+                    { text: student.totalCO.toFixed(2), alignment: 'center', bold: true },
+                    { 
+                        text: `${student.overallPercentage.toFixed(2)}%`, 
+                        alignment: 'center', 
+                        bold: true,
+                        color: overallPercentageClass
+                    }
+                );
+                
+                tableBody.push(row);
+            });
+            
+            // Ligne de moyennes
+            const averagesRow = ['MOYENNE CLASSE', '', ''];
+            courseNames.forEach(courseName => {
+                const courseAvg = calculateCourseAverage(studentResults, courseName);
+                const percentageClass = courseAvg.percentage >= 50 ? '#2e7d32' : '#c62828';
+                
+                averagesRow.push(
+                    { text: courseAvg.cm.toFixed(2), bold: true },
+                    { text: courseAvg.co.toFixed(2), bold: true, color: percentageClass }
+                );
+            });
+            
+            const classAvg = calculateClassAverages(studentResults);
+            const overallPercentageClass = classAvg.percentage >= 50 ? '#2e7d32' : '#c62828';
+            
+            averagesRow.push(
+                { text: classAvg.totalCM.toFixed(2), bold: true },
+                { text: classAvg.totalCO.toFixed(2), bold: true },
+                { text: `${classAvg.percentage.toFixed(2)}%`, bold: true, color: overallPercentageClass }
+            );
+            
+            tableBody.push(averagesRow.map(cell => typeof cell === 'object' ? cell : { 
+                text: cell, 
+                bold: true, 
+                fillColor: '#bbdefb' 
+            }));
+            
+            docContent.push({
+                table: {
+                    headerRows: 1,
+                    widths: Array(tableHeaders.length).fill('auto'),
+                    body: tableBody
+                },
+                margin: [0, 0, 0, 20]
+            });
+            
+            // Notes de bas de page
+            docContent.push({
+                text: 'Légende :',
+                bold: true,
+                margin: [0, 20, 0, 10]
+            });
+            
+            docContent.push({
+                text: [
+                    '• CM = Points maximum du cours\n',
+                    '• CO = Points obtenus par l\'élève\n',
+                    '• Les trois premiers classés sont mis en évidence\n',
+                    '• En vert : Pourcentage ≥ 50%\n',
+                    '• En rouge : Pourcentage < 50%\n',
+                    '• Les totaux sont calculés selon les règles de la période'
+                ],
+                margin: [0, 0, 0, 20]
+            });
+            
+            // Créer le document Word
+            const { default: docx } = await import('https://cdnjs.cloudflare.com/ajax/libs/docx/7.1.0/docx.min.js');
+            
+            const doc = new docx.Document({
+                sections: [{
+                    properties: {},
+                    children: docContent.map(item => {
+                        if (item.table) {
+                            return new docx.Table({
+                                rows: item.table.body.map(row => new docx.TableRow({
+                                    children: row.map(cell => new docx.TableCell({
+                                        children: [new docx.Paragraph({
+                                            children: [new docx.TextRun({
+                                                text: typeof cell === 'object' ? cell.text : cell,
+                                                bold: cell.bold,
+                                                color: cell.color
+                                            })],
+                                            alignment: 'center'
+                                        })],
+                                        shading: cell.fillColor ? {
+                                            fill: cell.fillColor
+                                        } : undefined
+                                    }))
+                                }))
+                            });
+                        } else {
+                            return new docx.Paragraph({
+                                children: [new docx.TextRun({
+                                    text: item.text,
+                                    bold: item.bold,
+                                    size: item.size ? item.size * 2 : 24
+                                })],
+                                alignment: item.alignment || 'left'
+                            });
+                        }
+                    })
+                }]
+            });
+            
+            // Télécharger
+            const blob = await docx.Packer.toBlob(doc);
+            const fileName = `Proclamation_${className}_${period}_${new Date().toISOString().split('T')[0]}.docx`;
+            saveAs(blob, fileName);
+            
+            showAlert('Fichier Word téléchargé avec succès', 'success');
+            
+        } catch (error) {
+            console.error('Erreur export Word:', error);
+            showAlert('Erreur lors de l\'export Word', 'error');
+        }
+    }
+
+    // --- Chargement des Données ---
+    async function loadDashboardData() {
+        showLoading('dashboard');
+        
+        try {
+            document.getElementById('classes-count').textContent = teacherClasses.length;
+            
+            let totalStudents = 0;
+            for (const classData of teacherClasses) {
+                const className = classData.className || classData;
+                const studentsQuery = query(collection(db, 'students'), where('class', '==', className));
+                const studentsSnap = await getDocs(studentsQuery);
+                totalStudents += studentsSnap.size;
+            }
+            document.getElementById('students-count').textContent = totalStudents;
+            
+            const pendingGradesQuery = query(
+                collection(db, 'grades'), 
+                where('teacherId', '==', currentTeacher.id),
+                where('published', '==', false)
+            );
+            const pendingGradesSnap = await getDocs(pendingGradesQuery);
+            document.getElementById('pending-grades').textContent = pendingGradesSnap.size;
+            
+            const pendingHomeworkQuery = query(
+                collection(db, 'homework'), 
+                where('teacherId', '==', currentTeacher.id),
+                where('dueDate', '>=', new Date())
+            );
+            const pendingHomeworkSnap = await getDocs(pendingHomeworkQuery);
+            document.getElementById('pending-homework').textContent = pendingHomeworkSnap.size;
+            
+            await loadNextClasses();
+            await loadNextClassInfo();
+            
+        } catch (error) {
+            console.error('Erreur chargement dashboard:', error);
+        }
+        
+        hideLoading('dashboard');
+    }
+
+    async function loadNextClasses() {
+        const container = document.getElementById('next-classes-container');
+        
+        let html = '';
+        teacherClasses.slice(0, 6).forEach(cls => {
+            const className = cls.className || cls;
+            const subject = cls.subject || currentTeacher.subjects[0];
+            html += `
+                <div class="class-card">
+                    <h4>${className}</h4>
+                    <p><strong>Matière:</strong> ${subject}</p>
+                    <p><strong>Niveau:</strong> ${cls.level || 'Non spécifié'}</p>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+    }
+
+    async function loadNextClassInfo() {
+        const container = document.getElementById('next-class-details');
+        
+        try {
+            const scheduleQuery = query(
+                collection(db, 'teacher_schedule'), 
+                where('teacherId', '==', currentTeacher.id)
+            );
+            const scheduleSnap = await getDocs(scheduleQuery);
+            
+            if (!scheduleSnap.empty) {
+                const now = new Date();
+                const today = now.getDay();
+                const currentTime = now.getHours() * 60 + now.getMinutes();
+                
+                let nextClass = null;
+                let minTimeDiff = Infinity;
+                
+                scheduleSnap.docs.forEach(doc => {
+                    const session = doc.data();
+                    const sessionDay = session.dayOfWeek;
+                    const [hours, minutes] = session.startTime.split(':').map(Number);
+                    const sessionStartMinutes = hours * 60 + minutes;
+                    
+                    let timeDiff;
+                    if (sessionDay > today) {
+                        timeDiff = (sessionDay - today) * 24 * 60 + sessionStartMinutes;
+                    } else if (sessionDay === today && sessionStartMinutes > currentTime) {
+                        timeDiff = sessionStartMinutes - currentTime;
+                    } else {
+                        return;
+                    }
+                    
+                    if (timeDiff < minTimeDiff) {
+                        minTimeDiff = timeDiff;
+                        nextClass = session;
+                    }
+                });
+                
+                if (nextClass) {
+                    const days = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+                    container.innerHTML = `
+                        <p><strong>${nextClass.subject}</strong> avec la classe <strong>${nextClass.className}</strong></p>
+                        <p>${days[nextClass.dayOfWeek]} à ${nextClass.startTime} - ${nextClass.endTime}</p>
+                        <p>Salle: ${nextClass.room || 'Non spécifiée'}</p>
+                    `;
+                } else {
+                    container.textContent = 'Aucun cours prévu aujourd\'hui';
+                }
+            } else {
+                container.textContent = 'Aucun emploi du temps disponible';
+            }
+        } catch (error) {
+            console.error('Erreur chargement prochain cours:', error);
+            container.textContent = 'Erreur de chargement';
+        }
+    }
+
+    async function loadClassesData() {
+        showLoading('classes');
+        const container = document.getElementById('classes-container');
+        
+        if (teacherClasses.length === 0) {
+            container.innerHTML = '<p>Aucune classe assignée.</p>';
+            hideLoading('classes');
+            return;
+        }
+        
+        let html = '';
+        for (const classData of teacherClasses) {
+            const className = classData.className || classData;
+            const subject = classData.subject || currentTeacher.subjects[0];
+            
+            try {
+                const studentsQuery = query(collection(db, 'students'), where('class', '==', className));
+                const studentsSnap = await getDocs(studentsQuery);
+                
+                html += `
+                    <div class="class-card">
+                        <h4>${className}</h4>
+                        <p><strong>Matière:</strong> ${subject}</p>
+                        <p><strong>Nombre d'élèves:</strong> ${studentsSnap.size}</p>
+                        <p><strong>Niveau:</strong> ${classData.level || 'Non spécifié'}</p>
+                        <div style="margin-top: 1rem;">
+                            <button class="btn btn-primary" onclick="viewClassDetails('${className}')">
+                                Voir Détails
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Erreur chargement classe:', error);
+            }
+        }
+        container.innerHTML = html;
+        hideLoading('classes');
+    }
+
+    async function loadStudentsData() {
+        showLoading('students');
+        const container = document.getElementById('students-container');
+        const classFilter = document.getElementById('students-class-filter');
+        
+        classFilter.innerHTML = '<option value="">Toutes les classes</option>';
+        teacherClasses.forEach(classData => {
+            const className = classData.className || classData;
+            classFilter.innerHTML += `<option value="${className}">${className}</option>`;
+        });
+        
+        classFilter.addEventListener('change', async () => {
+            await displayStudents(classFilter.value);
+        });
+        
+        await displayStudents('');
+        hideLoading('students');
+    }
+
+    async function displayStudents(classNameFilter) {
+        const container = document.getElementById('students-container');
+        
+        let studentsDocs = [];
+        
+        if (classNameFilter) {
+            try {
+                const studentsQuery = query(collection(db, 'students'), where('class', '==', classNameFilter));
+                const studentsSnap = await getDocs(studentsQuery);
+                studentsDocs = studentsSnap.docs;
+            } catch (error) {
+                console.error('Erreur chargement élèves:', error);
+            }
+        } else {
+            for (const classData of teacherClasses) {
+                const className = classData.className || classData;
+                try {
+                    const studentsQuery = query(collection(db, 'students'), where('class', '==', className));
+                    const studentsSnap = await getDocs(studentsQuery);
+                    studentsDocs = studentsDocs.concat(studentsSnap.docs);
+                } catch (error) {
+                    console.error('Erreur chargement élèves:', error);
+                }
+            }
+        }
+        
+        displayStudentsTable(studentsDocs);
+    }
+
+    function displayStudentsTable(studentsDocs) {
+        const container = document.getElementById('students-container');
+        
+        if (studentsDocs.length === 0) {
+            container.innerHTML = '<p>Aucun élève trouvé dans vos classes.</p>';
+            return;
+        }
+        
+        let html = `
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Photo</th>
+                            <th>Matricule</th>
+                            <th>Nom Complet</th>
+                            <th>Classe</th>
+                            <th>Option</th>
+                            <th>Date de Naissance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+        
+        studentsDocs.forEach(doc => {
+            const student = doc.data();
+            const photoHTML = student.photoURL 
+                ? `<img src="${student.photoURL}" class="student-photo">`
+                : '<div class="photo-placeholder"><i class="fas fa-user"></i></div>';
+            
+            html += `
+                <tr>
+                    <td>${photoHTML}</td>
+                    <td>${student.matricule}</td>
+                    <td>${student.fullName}</td>
+                    <td>${student.class}</td>
+                    <td>${getOptionName(student.option)}</td>
+                    <td>${student.birthdate || 'N/A'}</td>
+                </tr>
+            `;
+        });
+        
+        html += '</tbody></table></div>';
+        container.innerHTML = html;
+    }
+
+    async function loadClassSelects() {
+        showLoading('grades');
+        
+        const classSelects = [
+            'attendance-class-select', 'homework-class',
+            'students-class-filter', 'proclamation-class'
+        ];
+        
+        classSelects.forEach(selectId => {
+            const select = document.getElementById(selectId);
+            select.innerHTML = '<option value="">-- Choisir une classe --</option>';
+            
+            teacherClasses.forEach(classData => {
+                const className = classData.className || classData;
+                const subject = classData.subject || currentTeacher.subjects[0];
+                select.innerHTML += `<option value="${className}">${className} - ${subject}</option>`;
+            });
+        });
+        
+        const homeworkSubjectSelect = document.getElementById('homework-subject');
+        homeworkSubjectSelect.innerHTML = '<option value="">-- Choisir une matière --</option>';
+        
+        currentTeacher.subjects.forEach(subject => {
+            homeworkSubjectSelect.innerHTML += `<option value="${subject}">${subject}</option>`;
+        });
+        
+        hideLoading('grades');
+    }
+
+    // --- Gestion du chargement ---
+    function showLoading(page) {
+        const loadingEl = document.getElementById(`${page}-loading`);
+        const contentEl = document.getElementById(`${page}-content`);
+        if (loadingEl) loadingEl.classList.remove('hidden');
+        if (contentEl) contentEl.classList.add('hidden');
+    }
+
+    function hideLoading(page) {
+        const loadingEl = document.getElementById(`${page}-loading`);
+        const contentEl = document.getElementById(`${page}-content`);
+        if (loadingEl) loadingEl.classList.add('hidden');
+        if (contentEl) contentEl.classList.remove('hidden');
+    }
+
+    // --- Fonctions utilitaires ---
+    function getOptionName(optionCode) {
+        const options = {
+            'SC': 'Scientifique',
+            'LT': 'Littéraire',
+            'CM': 'Commerciale'
+        };
+        return options[optionCode] || optionCode;
+    }
+
+    function showAlert(message, type = 'info') {
+        const alertBox = document.getElementById('global-alert');
+        alertBox.textContent = message;
+        alertBox.className = `alert alert-${type}`;
+        alertBox.classList.remove('hidden');
+        setTimeout(() => alertBox.classList.add('hidden'), 6000);
+    }
+
+    function showLoginAlert(message, type = 'info') {
+        const alertBox = document.getElementById('login-alert');
+        alertBox.textContent = message;
+        alertBox.className = `alert alert-${type}`;
+        alertBox.classList.remove('hidden');
+        setTimeout(() => alertBox.classList.add('hidden'), 6000);
+    }
+
+    // --- Navigation ---
+    document.querySelectorAll('.nav-menu a').forEach(link => {
+        link.addEventListener('click', e => {
+            e.preventDefault();
+            document.querySelectorAll('.nav-menu a, .page').forEach(el => el.classList.remove('active'));
+            link.classList.add('active');
+            document.getElementById(link.dataset.page + '-page').classList.add('active');
+            document.getElementById('page-title').textContent = link.textContent;
+            
+            if (link.dataset.page === 'dashboard') {
+                loadDashboardData();
+            } else if (link.dataset.page === 'classes') {
+                loadClassesData();
+            } else if (link.dataset.page === 'students') {
+                loadStudentsData();
+            } else if (link.dataset.page === 'grades') {
+                // Initialiser le système par période
+                initializePeriodSelectors();
+            } else if (link.dataset.page === 'attendance') {
+                loadAttendanceHistory();
+            } else if (link.dataset.page === 'homework') {
+                loadHomeworkList();
+            } else if (link.dataset.page === 'proclamation') {
+                // Initialiser la proclamation
+            } else if (link.dataset.page === 'schedule') {
+                loadScheduleData();
+            }
+        });
+    });
+
+    // Initialiser la date d'aujourd'hui
+    const today = new Date().toISOString().split('T')[0];
+    if (document.getElementById('attendance-date')) {
+        document.getElementById('attendance-date').value = today;
+    }
+    if (document.getElementById('homework-due-date')) {
+        document.getElementById('homework-due-date').value = today;
+    }
+    if (document.getElementById('period-evaluation-date')) {
+        document.getElementById('period-evaluation-date').value = today;
+    }
+
+    // Fermer les modals
+    document.querySelectorAll('.close-modal').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.modal').forEach(modal => modal.classList.add('hidden'));
+        });
+    });
+
+    // ==================== GESTION DES PRÉSENCES ====================
+
+    async function loadAttendanceForm() {
+        const className = document.getElementById('attendance-class-select').value;
+        const date = document.getElementById('attendance-date').value;
+        
+        if (!className || !date) return;
+        
+        try {
+            const studentsQuery = query(collection(db, 'students'), where('class', '==', className));
+            const studentsSnap = await getDocs(studentsQuery);
+            
+            const attendanceQuery = query(
+                collection(db, 'attendance'),
+                where('className', '==', className),
+                where('date', '==', date),
+                where('teacherId', '==', currentTeacher.id)
+            );
+            
+            const attendanceSnap = await getDocs(attendanceQuery);
+            let existingAttendance = {};
+            
+            if (!attendanceSnap.empty) {
+                existingAttendance = attendanceSnap.docs[0].data().attendance || {};
+            }
+            
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Matricule</th>
+                            <th>Nom de l'élève</th>
+                            <th>Statut</th>
+                            <th>Remarques</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            studentsSnap.forEach(doc => {
+                const student = doc.data();
+                const currentStatus = existingAttendance[student.matricule] ? existingAttendance[student.matricule].status : 'present';
+                const currentRemark = existingAttendance[student.matricule] ? existingAttendance[student.matricule].remark : '';
+                
+                html += `
+                    <tr>
+                        <td>${student.matricule}</td>
+                        <td>${student.fullName}</td>
+                        <td>
+                            <select class="form-control attendance-status" id="attendance-${student.matricule}">
+                                <option value="present" ${currentStatus === 'present' ? 'selected' : ''}>Présent</option>
+                                <option value="absent" ${currentStatus === 'absent' ? 'selected' : ''}>Absent</option>
+                                <option value="late" ${currentStatus === 'late' ? 'selected' : ''}>En retard</option>
+                            </select>
+                        </td>
+                        <td>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="attendance-remark-${student.matricule}" 
+                                   value="${currentRemark}"
+                                   placeholder="Remarques (ex: motif d'absence)">
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table>';
+            document.getElementById('attendance-container').innerHTML = html;
+            
+        } catch (error) {
+            console.error('Erreur chargement formulaire présence:', error);
+            showAlert('Erreur lors du chargement des élèves', 'error');
+        }
+    }
+
+    document.getElementById('save-attendance-btn').addEventListener('click', async () => {
+        const className = document.getElementById('attendance-class-select').value;
+        const date = document.getElementById('attendance-date').value;
+        
+        if (!className || !date) {
+            showAlert('Veuillez sélectionner une classe et une date', 'error');
+            return;
+        }
+        
+        try {
+            const studentsQuery = query(collection(db, 'students'), where('class', '==', className));
+            const studentsSnap = await getDocs(studentsQuery);
+            
+            const attendance = {};
+            studentsSnap.forEach(doc => {
+                const student = doc.data();
+                const statusSelect = document.getElementById(`attendance-${student.matricule}`);
+                const remarkInput = document.getElementById(`attendance-remark-${student.matricule}`);
+                
+                if (statusSelect) {
+                    attendance[student.matricule] = {
+                        status: statusSelect.value,
+                        remark: remarkInput ? remarkInput.value : '',
+                        studentName: student.fullName
+                    };
+                }
+            });
+
+            const attendanceQuery = query(
+                collection(db, 'attendance'),
+                where('className', '==', className),
+                where('date', '==', date),
+                where('teacherId', '==', currentTeacher.id)
+            );
+            
+            const attendanceSnap = await getDocs(attendanceQuery);
+            
+            if (!attendanceSnap.empty) {
+                await updateDoc(doc(db, 'attendance', attendanceSnap.docs[0].id), {
+                    attendance: attendance,
+                    updatedAt: new Date()
+                });
+            } else {
+                await addDoc(collection(db, 'attendance'), {
+                    teacherId: currentTeacher.id,
+                    teacherName: currentTeacher.fullName,
+                    className: className,
+                    date: date,
+                    attendance: attendance,
+                    published: false,
+                    createdAt: new Date()
+                });
+            }
+            
+            showAlert('Présences enregistrées avec succès', 'success');
+            
+        } catch (error) {
+            console.error('Erreur enregistrement présences:', error);
+            showAlert('Erreur lors de l\'enregistrement des présences', 'error');
+        }
+    });
+
+    document.getElementById('publish-attendance-btn').addEventListener('click', async () => {
+        const className = document.getElementById('attendance-class-select').value;
+        const date = document.getElementById('attendance-date').value;
+        
+        if (!className || !date) {
+            showAlert('Veuillez sélectionner une classe et une date', 'error');
+            return;
+        }
+        
+        try {
+            const attendanceQuery = query(
+                collection(db, 'attendance'),
+                where('teacherId', '==', currentTeacher.id),
+                where('className', '==', className),
+                where('date', '==', date),
+                where('published', '==', false)
+            );
+            
+            const attendanceSnap = await getDocs(attendanceQuery);
+            
+            if (attendanceSnap.empty) {
+                showAlert('Aucune présence à publier pour cette date', 'info');
+                return;
+            }
+            
+            await updateDoc(doc(db, 'attendance', attendanceSnap.docs[0].id), { 
+                published: true, 
+                publishedAt: new Date() 
+            });
+            
+            showAlert('Présences publiées avec succès', 'success');
+            
+        } catch (error) {
+            console.error('Erreur publication présences:', error);
+            showAlert('Erreur lors de la publication des présences', 'error');
+        }
+    });
+
+    async function loadAttendanceHistory() {
+        const container = document.getElementById('attendance-history-container');
+        
+        try {
+            const attendanceQuery = query(
+                collection(db, 'attendance'),
+                where('teacherId', '==', currentTeacher.id),
+                orderBy('date', 'desc')
+            );
+            
+            const attendanceSnap = await getDocs(attendanceQuery);
+            
+            if (attendanceSnap.empty) {
+                container.innerHTML = '<p>Aucune présence enregistrée.</p>';
+                return;
+            }
+            
+            let html = '<div class="table-container"><table><thead><tr><th>Date</th><th>Classe</th><th>Présents</th><th>Absents</th><th>Retards</th><th>Statut</th><th>Actions</th></tr></thead><tbody>';
+            
+            attendanceSnap.forEach(doc => {
+                const attendanceData = doc.data();
+                
+                let presentCount = 0, absentCount = 0, lateCount = 0;
+                Object.values(attendanceData.attendance || {}).forEach(record => {
+                    if (record.status === 'present') presentCount++;
+                    else if (record.status === 'absent') absentCount++;
+                    else if (record.status === 'late') lateCount++;
+                });
+                
+                const status = attendanceData.published ? 
+                    '<span class="grade-badge" style="background: #e8f5e8; color: #2e7d32;">Publié</span>' : 
+                    '<span class="grade-badge" style="background: #fff3e0; color: #ef6c00;">Brouillon</span>';
+                
+                html += `
+                    <tr>
+                        <td>${attendanceData.date}</td>
+                        <td>${attendanceData.className}</td>
+                        <td>${presentCount}</td>
+                        <td>${absentCount}</td>
+                        <td>${lateCount}</td>
+                        <td>${status}</td>
+                        <td>
+                            <button class="btn btn-primary btn-sm" onclick="viewAttendanceDetails('${doc.id}')">Voir</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table></div>';
+            container.innerHTML = html;
+            
+        } catch (error) {
+            console.error('Erreur chargement historique présences:', error);
+            container.innerHTML = '<p>Erreur de chargement de l\'historique.</p>';
+        }
+    }
+
+    // ==================== GESTION DES DEVOIRS ====================
+
+    const homeworkFileUpload = document.getElementById('homework-file-upload');
+    const homeworkFileInput = document.getElementById('homework-file');
+    const homeworkFileBtn = document.getElementById('homework-file-btn');
+    const homeworkFilePreview = document.getElementById('homework-file-preview');
+    
+    homeworkFileBtn.addEventListener('click', () => {
+        homeworkFileInput.click();
+    });
+    
+    homeworkFileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                if (file.type.startsWith('image/')) {
+                    homeworkFilePreview.innerHTML = `<img src="${e.target.result}" class="file-preview" alt="Aperçu du fichier">`;
+                } else {
+                    homeworkFilePreview.innerHTML = `<p><i class="fas fa-file"></i> ${file.name}</p>`;
+                }
+            };
+            reader.readAsDataURL(file);
+            
+            homeworkFileUpload.classList.add('active');
+        }
+    });
+
+    document.getElementById('add-homework-btn').addEventListener('click', async () => {
+        const className = document.getElementById('homework-class').value;
+        const subject = document.getElementById('homework-subject').value;
+        const dueDate = document.getElementById('homework-due-date').value;
+        const title = document.getElementById('homework-title').value;
+        const description = document.getElementById('homework-description').value;
+        const file = document.getElementById('homework-file').files[0];
+        
+        if (!className || !subject || !dueDate || !title || !description) {
+            showAlert('Veuillez remplir tous les champs obligatoires', 'error');
+            return;
+        }
+        
+        try {
+            let fileURL = null;
+            let fileName = null;
+            
+            if (file) {
+                // Simuler l'upload (à remplacer par votre logique d'upload)
+                fileURL = URL.createObjectURL(file);
+                fileName = file.name;
+            }
+            
+            const homeworkData = {
+                teacherId: currentTeacher.id,
+                teacherName: currentTeacher.fullName,
+                className: className,
+                subject: subject,
+                title: title,
+                description: description,
+                dueDate: new Date(dueDate),
+                fileURL: fileURL,
+                fileName: fileName,
+                createdAt: new Date(),
+                submissions: []
+            };
+            
+            await addDoc(collection(db, 'homework'), homeworkData);
+            
+            showAlert('Devoir publié avec succès! Les élèves peuvent maintenant le voir.', 'success');
+            document.getElementById('homework-form').reset();
+            homeworkFilePreview.innerHTML = '';
+            homeworkFileUpload.classList.remove('active');
+            
+            loadHomeworkList();
+            
+        } catch (error) {
+            console.error('Erreur publication devoir:', error);
+            showAlert('Erreur lors de la publication du devoir: ' + error.message, 'error');
+        }
+    });
+
+    async function loadHomeworkList() {
+        const container = document.getElementById('homework-list-container');
+        showLoading('homework');
+        
+        try {
+            const homeworkQuery = query(
+                collection(db, 'homework'),
+                where('teacherId', '==', currentTeacher.id),
+                orderBy('createdAt', 'desc')
+            );
+            
+            const homeworkSnap = await getDocs(homeworkQuery);
+            
+            if (homeworkSnap.empty) {
+                container.innerHTML = '<p>Aucun devoir publié.</p>';
+                hideLoading('homework');
+                return;
+            }
+            
+            let html = '';
+            
+            homeworkSnap.forEach(doc => {
+                const homework = doc.data();
+                const dueDate = homework.dueDate.toDate().toLocaleDateString('fr-FR');
+                const createdAt = homework.createdAt.toDate().toLocaleDateString('fr-FR');
+                const submissionCount = homework.submissions ? homework.submissions.length : 0;
+                
+                html += `
+                    <div class="card homework-card">
+                        <h4>${homework.title}</h4>
+                        <p><strong>Classe:</strong> ${homework.className} | <strong>Matière:</strong> ${homework.subject}</p>
+                        <p><strong>Date de rendu:</strong> ${dueDate}</p>
+                        <p><strong>Date de publication:</strong> ${createdAt}</p>
+                        <p>${homework.description}</p>
+                        ${homework.fileURL ? `<p><a href="${homework.fileURL}" target="_blank" class="btn btn-info btn-sm"><i class="fas fa-file-download"></i> Télécharger le fichier (${homework.fileName})</a></p>` : ''}
+                        <p><strong>Soumissions:</strong> ${submissionCount} élève(s)</p>
+                        <div class="homework-actions">
+                            <button class="btn btn-primary" onclick="viewSubmissions('${doc.id}')">
+                                <i class="fas fa-eye"></i> Voir les soumissions
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteHomework('${doc.id}')">
+                                <i class="fas fa-trash"></i> Supprimer
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+            hideLoading('homework');
+            
+        } catch (error) {
+            console.error('Erreur chargement devoirs:', error);
+            container.innerHTML = '<p>Erreur de chargement des devoirs.</p>';
+            hideLoading('homework');
+        }
+    }
+
+    // ==================== EMPLOI DU TEMPS ====================
+
+    async function loadScheduleData() {
+        const container = document.getElementById('schedule-container');
+        showLoading('schedule');
+        
+        try {
+            const scheduleQuery = query(
+                collection(db, 'teacher_schedule'), 
+                where('teacherId', '==', currentTeacher.id),
+                orderBy('dayOfWeek'),
+                orderBy('startTime')
+            );
+            const scheduleSnap = await getDocs(scheduleQuery);
+            
+            if (scheduleSnap.empty) {
+                container.innerHTML = '<p>Aucun emploi du temps disponible.</p>';
+                hideLoading('schedule');
+                return;
+            }
+            
+            const scheduleByDay = {
+                1: [], // Lundi
+                2: [], // Mardi
+                3: [], // Mercredi
+                4: [], // Jeudi
+                5: []  // Vendredi
+            };
+            
+            scheduleSnap.docs.forEach(doc => {
+                const session = doc.data();
+                scheduleByDay[session.dayOfWeek].push(session);
+            });
+            
+            const days = ['', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
+            const now = new Date();
+            const currentDay = now.getDay();
+            const currentTime = now.getHours() * 60 + now.getMinutes();
+            
+            let html = '';
+            
+            for (let day = 1; day <= 5; day++) {
+                const sessions = scheduleByDay[day];
+                if (sessions.length === 0) continue;
+                
+                html += `
+                    <div class="timetable-day">
+                        <h4>${days[day]}</h4>
+                `;
+                
+                sessions.forEach(session => {
+                    const [hours, minutes] = session.startTime.split(':').map(Number);
+                    const sessionStartMinutes = hours * 60 + minutes;
+                    
+                    const isCurrent = (currentDay === day) && 
+                                     (currentTime >= sessionStartMinutes) && 
+                                     (currentTime < sessionStartMinutes + 60);
+                    
+                    html += `
+                        <div class="timetable-session ${isCurrent ? 'current' : ''}">
+                            <div>
+                                <strong>${session.startTime} - ${session.endTime}</strong>
+                                <br>${session.subject} - ${session.className}
+                            </div>
+                            <div>
+                                ${session.room ? `Salle: ${session.room}` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+            }
+            
+            container.innerHTML = html;
+            hideLoading('schedule');
+            
+        } catch (error) {
+            console.error('Erreur chargement emploi du temps:', error);
+            container.innerHTML = '<p>Erreur de chargement de l\'emploi du temps.</p>';
+            hideLoading('schedule');
+        }
+    }
+
+    // ==================== FONCTIONS GLOBALES ====================
+
+    window.viewClassDetails = async (className) => {
+        const modal = document.getElementById('class-details-modal');
+        const content = document.getElementById('class-details-content');
+        
+        content.innerHTML = '<p>Chargement...</p>';
+        modal.classList.remove('hidden');
+        
+        try {
+            const studentsQuery = query(collection(db, 'students'), where('class', '==', className));
+            const studentsSnap = await getDocs(studentsQuery);
+            
+            let html = `
+                <h4>Classe: ${className}</h4>
+                <p><strong>Nombre d'élèves:</strong> ${studentsSnap.size}</p>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Photo</th>
+                                <th>Matricule</th>
+                                <th>Nom</th>
+                                <th>Option</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            studentsSnap.forEach(doc => {
+                const student = doc.data();
+                const photoHTML = student.photoURL 
+                    ? `<img src="${student.photoURL}" class="student-photo">`
+                    : '<div class="photo-placeholder"><i class="fas fa-user"></i></div>';
+                
+                html += `
+                    <tr>
+                        <td>${photoHTML}</td>
+                        <td>${student.matricule}</td>
+                        <td>${student.fullName}</td>
+                        <td>${getOptionName(student.option)}</td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table></div>';
+            content.innerHTML = html;
+        } catch (error) {
+            content.innerHTML = '<p>Erreur de chargement des détails</p>';
+        }
+    };
+
+    window.viewAttendanceDetails = async (attendanceId) => {
+        const modal = document.getElementById('class-details-modal');
+        const content = document.getElementById('class-details-content');
+        
+        content.innerHTML = '<p>Chargement...</p>';
+        modal.classList.remove('hidden');
+        
+        try {
+            const attendanceDoc = await getDoc(doc(db, 'attendance', attendanceId));
+            const attendanceData = attendanceDoc.data();
+            
+            let html = `
+                <h4>Détails des présences</h4>
+                <p><strong>Classe:</strong> ${attendanceData.className}</p>
+                <p><strong>Date:</strong> ${attendanceData.date}</p>
+                
+                <div class="table-container" style="margin-top: 1rem;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Élève</th>
+                                <th>Statut</th>
+                                <th>Remarques</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            Object.values(attendanceData.attendance || {}).forEach(record => {
+                let statusClass = '';
+                let statusText = '';
+                
+                if (record.status === 'present') {
+                    statusClass = 'present';
+                    statusText = 'Présent';
+                } else if (record.status === 'absent') {
+                    statusClass = 'absent';
+                    statusText = 'Absent';
+                } else if (record.status === 'late') {
+                    statusClass = 'late';
+                    statusText = 'En retard';
+                }
+                
+                html += `
+                    <tr>
+                        <td>${record.studentName}</td>
+                        <td><span class="attendance-status ${statusClass}">${statusText}</span></td>
+                        <td>${record.remark || '-'}</td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table></div>';
+            content.innerHTML = html;
+            
+        } catch (error) {
+            console.error('Erreur chargement détails présence:', error);
+            content.innerHTML = '<p>Erreur de chargement des détails.</p>';
+        }
+    };
+
+    window.viewSubmissions = async (homeworkId) => {
+        const modal = document.getElementById('submissions-modal');
+        const content = document.getElementById('submissions-content');
+        
+        content.innerHTML = '<p>Chargement des soumissions...</p>';
+        modal.classList.remove('hidden');
+        
+        try {
+            const homeworkDoc = await getDoc(doc(db, 'homework', homeworkId));
+            const homework = homeworkDoc.data();
+            const submissions = homework.submissions || [];
+            
+            let html = `
+                <h4>${homework.title}</h4>
+                <p><strong>Classe:</strong> ${homework.className}</p>
+                <p><strong>Nombre de soumissions:</strong> ${submissions.length}</p>
+                <div class="table-container" style="margin-top: 1rem;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Élève</th>
+                                <th>Date de soumission</th>
+                                <th>Fichier</th>
+                                <th>Note</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            if (submissions.length === 0) {
+                html += '<tr><td colspan="5" style="text-align: center;">Aucune soumission pour le moment</td></tr>';
+            } else {
+                submissions.forEach((submission, index) => {
+                    const submissionDate = submission.submittedAt.toDate().toLocaleDateString('fr-FR');
+                    const grade = submission.grade ? `${submission.grade}/${submission.maxPoints || 20}` : 'Non noté';
+                    
+                    html += `
+                        <tr>
+                            <td>${submission.studentName}</td>
+                            <td>${submissionDate}</td>
+                            <td>
+                                ${submission.fileURL ? 
+                                    `<a href="${submission.fileURL}" target="_blank" class="btn btn-primary btn-sm"><i class="fas fa-file-download"></i> Télécharger</a>` : 
+                                    'Aucun fichier'}
+                            </td>
+                            <td>${grade}</td>
+                            <td>
+                                <button class="btn btn-primary btn-sm" onclick="gradeSubmission('${homeworkId}', ${index})">
+                                    ${submission.grade ? 'Modifier' : 'Noter'}
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+            
+            html += '</tbody></table></div>';
+            content.innerHTML = html;
+            
+        } catch (error) {
+            console.error('Erreur chargement soumissions:', error);
+            content.innerHTML = '<p>Erreur de chargement des soumissions.</p>';
+        }
+    };
+
+    window.gradeSubmission = async (homeworkId, submissionIndex) => {
+        const modal = document.getElementById('grade-submission-modal');
+        const content = document.getElementById('grade-submission-content');
+        
+        content.innerHTML = '<p>Chargement...</p>';
+        modal.classList.remove('hidden');
+        
+        try {
+            const homeworkDoc = await getDoc(doc(db, 'homework', homeworkId));
+            const homework = homeworkDoc.data();
+            const submission = homework.submissions[submissionIndex];
+            
+            let html = `
+                <h4>Noter la soumission de ${submission.studentName}</h4>
+                <p><strong>Devoir:</strong> ${homework.title}</p>
+                <p><strong>Date de soumission:</strong> ${submission.submittedAt.toDate().toLocaleDateString('fr-FR')}</p>
+                ${submission.fileURL ? `<p><a href="${submission.fileURL}" target="_blank" class="btn btn-primary"><i class="fas fa-file-download"></i> Télécharger la soumission</a></p>` : ''}
+                ${submission.textAnswer ? `<p><strong>Réponse textuelle:</strong><br>${submission.textAnswer}</p>` : ''}
+                
+                <div class="form-group">
+                    <label>Note (sur ${submission.maxPoints || 20})</label>
+                    <input type="number" id="submission-grade" class="form-control" min="0" max="${submission.maxPoints || 20}" step="0.5" value="${submission.grade || ''}">
+                </div>
+                <div class="form-group">
+                    <label>Commentaires</label>
+                    <textarea id="submission-comments" class="form-control" rows="3">${submission.comments || ''}</textarea>
+                </div>
+                <button class="btn btn-success" onclick="saveGrade('${homeworkId}', ${submissionIndex})">Enregistrer la note</button>
+            `;
+            
+            content.innerHTML = html;
+            
+        } catch (error) {
+            console.error('Erreur chargement soumission:', error);
+            content.innerHTML = '<p>Erreur de chargement de la soumission.</p>';
+        }
+    };
+
+    window.saveGrade = async (homeworkId, submissionIndex) => {
+        try {
+            const grade = parseFloat(document.getElementById('submission-grade').value);
+            const comments = document.getElementById('submission-comments').value;
+            
+            if (isNaN(grade)) {
+                showAlert('Veuillez entrer une note valide', 'error');
+                return;
+            }
+            
+            const homeworkDoc = await getDoc(doc(db, 'homework', homeworkId));
+            const homework = homeworkDoc.data();
+            const submissions = [...homework.submissions];
+            
+            submissions[submissionIndex] = {
+                ...submissions[submissionIndex],
+                grade: grade,
+                comments: comments,
+                gradedAt: new Date()
+            };
+            
+            await updateDoc(doc(db, 'homework', homeworkId), {
+                submissions: submissions
+            });
+            
+            showAlert('Note enregistrée avec succès', 'success');
+            document.getElementById('grade-submission-modal').classList.add('hidden');
+            viewSubmissions(homeworkId);
+            
+        } catch (error) {
+            console.error('Erreur enregistrement note:', error);
+            showAlert('Erreur lors de l\'enregistrement de la note', 'error');
+        }
+    };
+
+    window.deleteHomework = async (homeworkId) => {
+        if (!confirm('Êtes-vous sûr de vouloir supprimer ce devoir ?')) return;
+        
+        try {
+            await deleteDoc(doc(db, 'homework', homeworkId));
+            showAlert('Devoir supprimé avec succès', 'success');
+            loadHomeworkList();
+        } catch (error) {
+            console.error('Erreur suppression devoir:', error);
+            showAlert('Erreur lors de la suppression du devoir', 'error');
+        }
+    };
+
+    document.getElementById('change-password-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const currentPassword = document.getElementById('current-password').value;
+        const newPassword = document.getElementById('new-password').value;
+        const confirmNewPassword = document.getElementById('confirm-new-password').value;
+        
+        if (newPassword !== confirmNewPassword) {
+            showAlert('Les nouveaux mots de passe ne correspondent pas', 'error');
+            return;
+        }
+        
+        if (newPassword.length < 6) {
+            showAlert('Le nouveau mot de passe doit contenir au moins 6 caractères', 'error');
+            return;
+        }
+        
+        try {
+            const user = auth.currentUser;
+            await updatePassword(user, newPassword);
+            showAlert('Mot de passe changé avec succès', 'success');
+            document.getElementById('change-password-form').reset();
+        } catch (error) {
+            showAlert('Erreur lors du changement de mot de passe: ' + error.message, 'error');
+        }
+    });
+
+    document.getElementById('export-students-btn').addEventListener('click', () => {
+        showAlert('Fonctionnalité d\'export en développement', 'info');
+    });
+
+    // Initialiser les écouteurs d'événements
+    document.getElementById('attendance-class-select').addEventListener('change', loadAttendanceForm);
+    document.getElementById('attendance-date').addEventListener('change', loadAttendanceForm);
+
+</script>
+
+<!-- Scripts de mise à jour -->
+
+
+<script>
+// Initialisation immédiate
+(function() {
+  // Vérifier si Service Worker est supporté
+  if ('serviceWorker' in navigator) {
+    // Enregistrer le Service Worker immédiatement
+    window.addEventListener('load', async () => {
+      try {
+        const registration = await navigator.serviceWorker.register('./sw.js');
+        console.log('✅ Service Worker enregistré avec succès');
+        
+        // Vérifier les mises à jour toutes les 15 minutes
+        setInterval(() => {
+          registration.update();
+        }, 15 * 60 * 1000);
+        
+        // Vérifier maintenant
+        setTimeout(() => {
+          registration.update();
+        }, 10000);
+        
+      } catch (error) {
+        console.error('❌ Erreur Service Worker:', error);
+      }
+    });
+  }
+  
+  // Afficher la version dans la console
+  console.log('%c🚀 CS La Colombe - Espace Parent', 'color: #3498db; font-size: 16px; font-weight: bold;');
+  console.log('%cSystème de mise à jour en temps réel activé', 'color: #2ecc71;');
+  
+})();
+
+// Fonctions utilitaires
+window.reloadApp = function() {
+  window.location.reload();
+};
+
+window.clearAppCache = function() {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(registrations => {
+      registrations.forEach(registration => {
+        registration.unregister();
+      });
+    });
+  }
+  
+  caches.keys().then(cacheNames => {
+    cacheNames.forEach(cacheName => {
+      caches.delete(cacheName);
+    });
+  });
+  
+  localStorage.clear();
+  sessionStorage.clear();
+  
+  setTimeout(() => {
+    window.location.reload();
+  }, 1000);
+};
+</script>
+
+<script>
+<script>
+// Initialisation immédiate
+(function() {
+  // Vérifier si Service Worker est supporté
+  if ('serviceWorker' in navigator) {
+    // Enregistrer le Service Worker immédiatement
+    window.addEventListener('load', async () => {
+      try {
+        const registration = await navigator.serviceWorker.register('./sw.js');
+        console.log('✅ Service Worker enregistré avec succès');
+        
+        // Vérifier les mises à jour toutes les 15 minutes
+        setInterval(() => {
+          registration.update();
+        }, 15 * 60 * 1000);
+        
+        // Vérifier maintenant
+        setTimeout(() => {
+          registration.update();
+        }, 10000);
+        
+      } catch (error) {
+        console.error('❌ Erreur Service Worker:', error);
+      }
+    });
+  }
+  
+  // Afficher la version dans la console
+  console.log('%c🚀 CS La Colombe - Espace Parent', 'color: #3498db; font-size: 16px; font-weight: bold;');
+  console.log('%cSystème de mise à jour en temps réel activé', 'color: #2ecc71;');
+  
+})();
+
+// Fonctions utilitaires
+window.reloadApp = function() {
+  window.location.reload();
+};
+
+window.clearAppCache = function() {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(registrations => {
+      registrations.forEach(registration => {
+        registration.unregister();
+      });
+    });
+  }
+  
+  caches.keys().then(cacheNames => {
+    cacheNames.forEach(cacheName => {
+      caches.delete(cacheName);
+    });
+  });
+  
+  localStorage.clear();
+  sessionStorage.clear();
+  
+  setTimeout(() => {
+    window.location.reload();
+  }, 1000);
+};
+
+</script>
+
+<script>
+
+ Afficher une notification de mise à jour
+function showUpdateNotification(newVersion, previousVersion) {
+  const updateToast = document.createElement('div');
+  updateToast.className = 'notification-toast success';
+  updateToast.innerHTML = `
+    <div class="notification-header">
+      <div class="notification-title">
+        <i class="fas fa-sync-alt"></i> Mise à jour disponible
+      </div>
+      <button class="notification-close">&times;</button>
+    </div>
+    <div class="notification-body">
+      <p>Une nouvelle version (${newVersion}) de l'application est disponible !</p>
+      <p><small>Version précédente: ${previousVersion || 'inconnue'}</small></p>
+      <div class="notification-actions" style="margin-top: 10px;">
+        <button class="btn btn-primary btn-sm" id="update-app-btn">
+          <i class="fas fa-redo"></i> Mettre à jour
+        </button>
+        <button class="btn btn-secondary btn-sm" id="later-update-btn">
+          Plus tard
+        </button>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(updateToast);
+  
+  setTimeout(() => {
+    updateToast.classList.add('show');
+  }, 1000);
+  
+  // Gérer le bouton de mise à jour
+  document.getElementById('update-app-btn').addEventListener('click', () => {
+    updateToast.classList.remove('show');
+    setTimeout(() => updateToast.remove(), 300);
+    
+    // Recharger la page pour activer la nouvelle version
+    window.location.reload();
+  });
+  
+  // Gérer le bouton "Plus tard"
+  document.getElementById('later-update-btn').addEventListener('click', () => {
+    updateToast.classList.remove('show');
+    setTimeout(() => updateToast.remove(), 300);
+  });
+  
+  // Fermer le toast
+  updateToast.querySelector('.notification-close').addEventListener('click', () => {
+    updateToast.classList.remove('show');
+    setTimeout(() => updateToast.remove(), 300);
+  });
+}
+
+// Afficher une notification de mise à jour obligatoire
+function showMandatoryUpdateNotification(newVersion, currentVersion, updateUrl) {
+  const mandatoryToast = document.createElement('div');
+  mandatoryToast.className = 'notification-toast danger';
+  mandatoryToast.style.zIndex = '99999'; // Assurez-vous qu'il est au-dessus de tout
+  mandatoryToast.innerHTML = `
+    <div class="notification-header">
+      <div class="notification-title">
+        <i class="fas fa-exclamation-triangle"></i> Mise à jour REQUISE
+      </div>
+      <button class="notification-close" disabled>&times;</button>
+    </div>
+    <div class="notification-body">
+      <p><strong>Mise à jour obligatoire !</strong></p>
+      <p>La version ${newVersion} est requise pour continuer à utiliser l'application.</p>
+      <p><small>Votre version actuelle: ${currentVersion}</small></p>
+      <div class="notification-actions" style="margin-top: 10px;">
+        <button class="btn btn-warning btn-sm" id="mandatory-update-btn">
+          <i class="fas fa-download"></i> Mettre à jour maintenant
+        </button>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(mandatoryToast);
+  
+  setTimeout(() => {
+    mandatoryToast.classList.add('show');
+    
+    // Bloquer l'interface utilisateur
+    const overlay = document.createElement('div');
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+    overlay.style.backgroundColor = 'rgba(0,0,0,0.7)';
+    overlay.style.zIndex = '99998';
+    overlay.id = 'update-overlay';
+    document.body.appendChild(overlay);
+  }, 500);
+  
+  // Gérer le bouton de mise à jour obligatoire
+  document.getElementById('mandatory-update-btn').addEventListener('click', () => {
+    // Rediriger vers l'URL de mise à jour
+    window.location.href = updateUrl;
+  });
+  
+  // Empêcher la fermeture
+  mandatoryToast.querySelector('.notification-close').addEventListener('click', (e) => {
+    e.preventDefault();
+    showToast('Cette mise à jour est obligatoire pour continuer à utiliser l\'application', 'warning');
+  });
+}
+
+// Vérifier les mises à jour manuellement
+async function checkForUpdates() {
+  try {
+    const response = await fetch(`/version-check.json?t=${Date.now()}`);
+    const data = await response.json();
+    
+    // Vérifier la version actuelle depuis le service worker
+    if (navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({
+        type: 'GET_VERSION'
+      });
+    }
+    
+    // Comparer avec la version stockée localement
+    const currentVersion = localStorage.getItem('app_version');
+    
+    if (currentVersion !== data.version) {
+      // Nouvelle version disponible
+      showUpdateNotification(data.version, currentVersion);
+      localStorage.setItem('app_version', data.version);
+      
+      // Si la mise à jour est obligatoire
+      if (data.mandatory === true) {
+        showMandatoryUpdateNotification(data.version, currentVersion, data.updateUrl);
+      }
+    }
+    
+  } catch (error) {
+    console.error('Erreur lors de la vérification des mises à jour:', error);
+  }
+}
+
+// Vérifier la version au chargement
+window.addEventListener('load', () => {
+  // Stocker la version actuelle
+  if (!localStorage.getItem('app_version')) {
+    localStorage.setItem('app_version', '1.0.0');
+  }
+  
+  // Vérifier les mises à jour après 5 secondes
+  setTimeout(() => {
+    checkForUpdates();
+  }, 5000);
+});
+
+// Écouter les événements de mise à jour du service worker
+let refreshing = false;
+navigator.serviceWorker.addEventListener('controllerchange', () => {
+  if (!refreshing) {
+    refreshing = true;
+    window.location.reload();
+  }
+});
+</script>
+</body>
+</html>
