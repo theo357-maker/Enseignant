@@ -5,8 +5,8 @@ const SYNC_INTERVAL = 15 * 60 * 1000; // 15 minutes
 
 const urlsToCache = [
   '/',
-  '/index.html',
-  '/manifest.json',
+  'index.html',
+  'manifest.json',
   '/icon-72x72.png',
   '/icon-192x192.png',
   '/icon-512x512.png',
