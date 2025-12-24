@@ -11,6 +11,12 @@
     <script src="https://unpkg.com/docx@7.1.0/build/index.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
+
+ <!-- Service Worker et mise à jour -->
+    <meta name="version" content="2.1.0">
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+
+
     <!-- PWA Meta Tags -->
     <meta name="application-name" content="TheoVêt">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -24,8 +30,7 @@
     <meta name="theme-color" content="#3498db">
 
     <!-- Service Worker et mise à jour -->
-    <meta name="version" content="2.1.0">
-    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+ 
 
     <!-- Apple Touch Icons -->
     <link rel="apple-touch-icon" href="icon-192x192.png">
@@ -530,40 +535,35 @@
                 </div>
 
                 <!-- Page: Gestion des Notes -->
-                <div id="grades-page" class="page">
-                    <div class="loading" id="grades-loading">
-                        <i class="fas fa-spinner fa-spin"></i> Chargement des données...
-                    </div>
-                    <div id="grades-content" class="hidden">
-                        <!-- Nouvelle interface par période -->
-                        <div class="card">
-                            <h3>Système de Gestion des Notes par Période</h3>
-                            
-                            <!-- Sélection de la période -->
-                            <div class="period-selector">
-                                <div class="period-option" data-period="P1" onclick="selectPeriod('P1')">1ère P</div>
-                                <div class="period-option" data-period="P2" onclick="selectPeriod('P2')">2ème P</div>
-                                <div class="period-option" data-period="EXAM_S1" onclick="selectPeriod('EXAM_S1')">Examen Semestre 1</div>
-                                <div class="period-option" data-period="TOTAL_S1" onclick="selectPeriod('TOTAL_S1')">Total Semestre 1</div>
-                                <div class="period-option" data-period="P3" onclick="selectPeriod('P3')">3ème P</div>
-                                <div class="period-option" data-period="P4" onclick="selectPeriod('P4')">4ème P</div>
-                                <div class="period-option" data-period="EXAM_S2" onclick="selectPeriod('EXAM_S2')">Examen Semestre 2</div>
-                                <div class="period-option" data-period="TOTAL_S2" onclick="selectPeriod('TOTAL_S2')">Total Semestre 2</div>
-                                <div class="period-option" data-period="TOTAL_GENERAL" onclick="selectPeriod('TOTAL_GENERAL')">Total Général</div>
-                            </div>
-                            
-                            <!-- Description de la période -->
-                            <div id="period-description" class="period-description">
-                                <h4>Sélectionnez une période pour commencer</h4>
-                                <p>Chaque période a des règles de calcul spécifiques :</p>
-                                <ul>
-                                    <li><strong>1ère P, 2ème P, 3ème P, 4ème P:</strong> Notes des évaluations continues</li>
-                                    <li><strong>Examen Semestre 1/2:</strong> Notes d'examen</li>
-                                    <li><strong>Total Semestre 1:</strong> CM = P1.CM + P2.CM + EXAM_S1.CM | CO = P1.CO + P2.CO + EXAM_S1.CO</li>
-                                    <li><strong>Total Semestre 2:</strong> CM = P3.CM + P4.CM + EXAM_S2.CM | CO = P3.CO + P4.CO + EXAM_S2.CO</li>
-                                    <li><strong>Total Général:</strong> Moyenne des deux semestres</li>
-                                </ul>
-                            </div>
+<div id="grades-page" class="page">
+    <div class="loading" id="grades-loading">
+        <i class="fas fa-spinner fa-spin"></i> Chargement des données...
+    </div>
+    <div id="grades-content" class="hidden">
+        <!-- Nouvelle interface par période -->
+        <div class="card">
+            <h3>Système de Gestion des Notes par Période</h3>
+            
+            <!-- Sélection de la période -->
+            <div class="period-selector">
+                <div class="period-option" data-period="P1" onclick="selectPeriod('P1')">1ère P</div>
+                <div class="period-option" data-period="P2" onclick="selectPeriod('P2')">2ème P</div>
+                <div class="period-option" data-period="EXAM_S1" onclick="selectPeriod('EXAM_S1')">Examen Semestre 1</div>
+                <div class="period-option" data-period="P3" onclick="selectPeriod('P3')">3ème P</div>
+                <div class="period-option" data-period="P4" onclick="selectPeriod('P4')">4ème P</div>
+                <div class="period-option" data-period="EXAM_S2" onclick="selectPeriod('EXAM_S2')">Examen Semestre 2</div>
+            </div>
+            
+            <!-- Description de la période -->
+            <div id="period-description" class="period-description">
+                <h4>Sélectionnez une période pour commencer</h4>
+                <p>Chaque période a des règles de calcul spécifiques :</p>
+                <ul>
+                    <li><strong>1ère P, 2ème P, 3ème P, 4ème P:</strong> Notes des évaluations continues</li>
+                    <li><strong>Examen Semestre 1/2:</strong> Notes d'examen</li>
+                </ul>
+            </div>
+        
                             
                             <!-- Formulaire de saisie -->
                             <div id="period-form" class="hidden">
@@ -580,25 +580,11 @@
                                             <option value="">-- Choisir une matière --</option>
                                         </select>
                                     </div>
-                                    <div class="form-group" style="flex: 1;">
-                                        <label>Type d'évaluation</label>
-                                        <select id="period-grade-type" class="form-control">
-                                            <option value="devoir">Devoir</option>
-                                            <option value="composition">Composition</option>
-                                            <option value="interrogation">Interrogation</option>
-                                            <option value="projet">Projet</option>
-                                            <option value="examen">Examen</option>
-                                        </select>
-                                    </div>
                                 </div>
                                 <div class="form-row" style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
                                     <div class="form-group" style="flex: 1;">
                                         <label>Point maximum (CM)</label>
                                         <input type="number" id="period-max-points" class="form-control" value="20" min="1">
-                                    </div>
-                                    <div class="form-group" style="flex: 2;">
-                                        <label>Description de l'évaluation</label>
-                                        <input type="text" id="period-evaluation-description" class="form-control" placeholder="Ex: Devoir sur les fonctions">
                                     </div>
                                 </div>
                                 <div class="form-group" style="margin-bottom: 1.5rem;">
@@ -606,9 +592,14 @@
                                     <input type="date" id="period-evaluation-date" class="form-control">
                                 </div>
                                 
-                                <button id="load-students-btn" class="btn btn-primary">
-                                    <i class="fas fa-users"></i> Charger les élèves
-                                </button>
+                                <div class="form-row" style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+                                    <button id="load-students-btn" class="btn btn-primary">
+                                        <i class="fas fa-users"></i> Charger les élèves
+                                    </button>
+                                    <button id="load-saved-grades-btn" class="btn btn-info" style="display: none;">
+                                        <i class="fas fa-history"></i> Charger les notes publiées
+                                    </button>
+                                </div>
                             </div>
                             
                             <!-- Tableau Excel-like pour la saisie -->
@@ -621,8 +612,8 @@
                                                 <th>N°</th>
                                                 <th>Matricule</th>
                                                 <th>Nom Complet</th>
-                                                <th>Note (CO)</th>
                                                 <th>CM Max</th>
+                                                <th>Note (CO)</th>
                                                 <th>Pourcentage</th>
                                                 <th>Remarques</th>
                                             </tr>
@@ -668,11 +659,6 @@
                                     </button>
                                 </div>
                             </div>
-                        </div>
-                        
-                        <!-- Section pour afficher les calculs -->
-                        <div id="calculations-container" class="hidden">
-                            <!-- Rempli dynamiquement selon la période -->
                         </div>
                     </div>
                 </div>
@@ -828,6 +814,9 @@
                                 </button>
                                 <button id="download-word-btn" class="btn btn-primary">
                                     <i class="fas fa-file-word"></i> Exporter Word
+                                </button>
+                                <button id="download-pdf-btn" class="btn btn-danger">
+                                    <i class="fas fa-file-pdf"></i> Exporter PDF
                                 </button>
                             </div>
                             <div id="proclamation-table-container" class="table-container" style="margin-top: 1rem;"></div>
@@ -1016,6 +1005,7 @@
     let currentPeriod = null;
     let currentPeriodData = {};
     let periodGradesTable = [];
+    let publishedGradesData = null; // Pour stocker les notes déjà publiées
 
     // --- FONCTION POUR AFFICHER LA PHOTO DE L'ENSEIGNANT ---
     function displayTeacherPhoto(photoURL, elementId) {
@@ -1309,6 +1299,9 @@
         // Événement pour charger les élèves
         document.getElementById('load-students-btn').addEventListener('click', loadStudentsForPeriod);
         
+        // Événement pour charger les notes déjà publiées
+        document.getElementById('load-saved-grades-btn').addEventListener('click', loadPublishedGradesForModification);
+        
         // Événements pour les boutons de période
         document.getElementById('save-period-grades-btn').addEventListener('click', savePeriodGrades);
         document.getElementById('update-period-grades-btn').addEventListener('click', updatePeriodGrades);
@@ -1321,6 +1314,7 @@
             document.getElementById('load-proclamation-data-btn').addEventListener('click', loadProclamationData);
             document.getElementById('download-excel-btn').addEventListener('click', downloadProclamationExcel);
             document.getElementById('download-word-btn').addEventListener('click', downloadProclamationWord);
+            document.getElementById('download-pdf-btn').addEventListener('click', downloadProclamationPDF);
             
             // Remplir le select des classes pour la proclamation (uniquement la classe dont il est titulaire)
             const proclamationClassSelect = document.getElementById('proclamation-class');
@@ -1354,55 +1348,50 @@
         document.getElementById('grades-table-body').innerHTML = '';
         periodGradesTable = [];
         
+        // Afficher le bouton pour charger les notes publiées
+        document.getElementById('load-saved-grades-btn').style.display = 'inline-block';
+        
         // Charger les notes enregistrées pour cette période
         loadSavedPeriodGrades();
     };
 
     // --- Mettre à jour la description de la période ---
-    function updatePeriodDescription(period) {
-        const descriptions = {
-            'P1': 'Première Période - Évaluations continues',
-            'P2': 'Deuxième Période - Évaluations continues',
-            'EXAM_S1': 'Examen du Semestre 1',
-            'TOTAL_S1': 'Total Semestre 1 (CM = P1 + P2 + EXAM_S1 | CO = P1 + P2 + EXAM_S1)',
-            'P3': 'Troisième Période - Évaluations continues',
-            'P4': 'Quatrième Période - Évaluations continues',
-            'EXAM_S2': 'Examen du Semestre 2',
-            'TOTAL_S2': 'Total Semestre 2 (CM = P3 + P4 + EXAM_S2 | CO = P3 + P4 + EXAM_S2)',
-            'TOTAL_GENERAL': 'Total Général (Moyenne des deux semestres)'
-        };
-        
-        const periodDescription = document.getElementById('period-description');
-        periodDescription.innerHTML = `
-            <h4>${descriptions[period]}</h4>
-            <p><strong>Règles de calcul :</strong></p>
-            <ul>
-                ${getPeriodCalculationRules(period)}
-            </ul>
-        `;
-    }
-
+    // --- Mettre à jour la description de la période ---
+function updatePeriodDescription(period) {
+    const descriptions = {
+        'P1': 'Première Période - Évaluations continues',
+        'P2': 'Deuxième Période - Évaluations continues',
+        'EXAM_S1': 'Examen du Semestre 1',
+        'P3': 'Troisième Période - Évaluations continues',
+        'P4': 'Quatrième Période - Évaluations continues',
+        'EXAM_S2': 'Examen du Semestre 2'
+    };
+    
+    const periodDescription = document.getElementById('period-description');
+    periodDescription.innerHTML = `
+        <h4>${descriptions[period]}</h4>
+        <p><strong>Règles de calcul :</strong></p>
+        <ul>
+            ${getPeriodCalculationRules(period)}
+        </ul>
+    `;
+}
     // --- Obtenir les règles de calcul pour une période ---
-    function getPeriodCalculationRules(period) {
-        switch(period) {
-            case 'P1':
-            case 'P2':
-            case 'P3':
-            case 'P4':
-                return '<li>Saisie directe des notes des évaluations continues</li><li>CM = Points maximum</li><li>CO = Points obtenus par l\'élève</li>';
-            case 'EXAM_S1':
-            case 'EXAM_S2':
-                return '<li>Notes d\'examen</li><li>CM = Points maximum de l\'examen</li><li>CO = Points obtenus à l\'examen</li>';
-            case 'TOTAL_S1':
-                return '<li><strong>CM Total = P1.CM + P2.CM + EXAM_S1.CM</strong></li><li><strong>CO Total = P1.CO + P2.CO + EXAM_S1.CO</strong></li><li>Pourcentage = (CO Total / CM Total) × 100</li><li><em>Les données sont chargées automatiquement des périodes précédentes</em></li>';
-            case 'TOTAL_S2':
-                return '<li><strong>CM Total = P3.CM + P4.CM + EXAM_S2.CM</strong></li><li><strong>CO Total = P3.CO + P4.CO + EXAM_S2.CO</strong></li><li>Pourcentage = (CO Total / CM Total) × 100</li><li><em>Les données sont chargées automatiquement des périodes précédentes</em></li>';
-            case 'TOTAL_GENERAL':
-                return '<li>Total Général = Moyenne de TOTAL_S1 et TOTAL_S2</li><li>CM Final = (CM S1 + CM S2) / 2</li><li>CO Final = (CO S1 + CO S2) / 2</li><li>Pourcentage Final = (CO Final / CM Final) × 100</li>';
-            default:
-                return '';
-        }
+    // --- Obtenir les règles de calcul pour une période ---
+function getPeriodCalculationRules(period) {
+    switch(period) {
+        case 'P1':
+        case 'P2':
+        case 'P3':
+        case 'P4':
+            return '<li>Saisie directe des notes des évaluations continues</li><li>CM = Points maximum</li><li>CO = Points obtenus par l\'élève</li><li>Pourcentage = (CO / CM) × 100</li>';
+        case 'EXAM_S1':
+        case 'EXAM_S2':
+            return '<li>Notes d\'examen</li><li>CM = Points maximum de l\'examen</li><li>CO = Points obtenus à l\'examen</li><li>Pourcentage = (CO / CM) × 100</li>';
+        default:
+            return '';
     }
+}
 
     // --- Charger les élèves pour la période sélectionnée ---
     async function loadStudentsForPeriod() {
@@ -1419,15 +1408,6 @@
             const studentsSnap = await getDocs(studentsQuery);
             
             periodGradesTable = [];
-            
-            // Vérifier si c'est une période de total (S1, S2 ou Général)
-            const isTotalPeriod = currentPeriod === 'TOTAL_S1' || currentPeriod === 'TOTAL_S2' || currentPeriod === 'TOTAL_GENERAL';
-            
-            if (isTotalPeriod) {
-                // Pour les périodes de total, charger les données automatiquement
-                await loadAutoCalculatedGrades(className, subject);
-                return;
-            }
             
             let html = '';
             let counter = 1;
@@ -1451,6 +1431,7 @@
                         <td>${counter}</td>
                         <td>${student.matricule}</td>
                         <td>${student.fullName}</td>
+                        <td>${document.getElementById('period-max-points').value}</td>
                         <td class="editable-cell" data-id="${studentId}" data-field="grade">
                             <input type="number" class="grade-input" 
                                    value="0" 
@@ -1459,7 +1440,6 @@
                                    step="0.5"
                                    onchange="updatePeriodGrade('${studentId}', 'grade', this.value)">
                         </td>
-                        <td>${document.getElementById('period-max-points').value}</td>
                         <td class="percentage-cell" id="percentage-${studentId}">0%</td>
                         <td class="editable-cell" data-id="${studentId}" data-field="remark">
                             <input type="text" class="form-control" 
@@ -1480,107 +1460,121 @@
         }
     }
 
-    // --- Charger les notes automatiquement calculées pour les périodes de total ---
-    async function loadAutoCalculatedGrades(className, subject) {
+    // --- Charger les notes déjà publiées pour modification ---
+    async function loadPublishedGradesForModification() {
+        const className = document.getElementById('period-class-select').value;
+        const subject = document.getElementById('period-subject').value;
+        
+        if (!className || !subject || !currentPeriod) {
+            showAlert('Veuillez sélectionner une classe, une matière et une période', 'error');
+            return;
+        }
+        
         try {
-            const studentsQuery = query(collection(db, 'students'), where('class', '==', className));
-            const studentsSnap = await getDocs(studentsQuery);
+            // Vérifier dans parent_grades (notes publiées aux parents)
+            const parentGradesQuery = query(
+                collection(db, 'parent_grades'),
+                where('teacherId', '==', currentTeacher.id),
+                where('period', '==', currentPeriod),
+                where('className', '==', className),
+                where('subject', '==', subject)
+            );
             
-            periodGradesTable = [];
+            const parentGradesSnap = await getDocs(parentGradesQuery);
             
-            let html = '';
-            let counter = 1;
-            
-            // Déterminer quelles périodes additionner
-            let sourcePeriods = [];
-            if (currentPeriod === 'TOTAL_S1') {
-                sourcePeriods = ['P1', 'P2', 'EXAM_S1'];
-            } else if (currentPeriod === 'TOTAL_S2') {
-                sourcePeriods = ['P3', 'P4', 'EXAM_S2'];
-            } else if (currentPeriod === 'TOTAL_GENERAL') {
-                sourcePeriods = ['TOTAL_S1', 'TOTAL_S2'];
+            if (parentGradesSnap.empty) {
+                // Vérifier dans tutor_grades (notes publiées aux titulaires)
+                const tutorGradesQuery = query(
+                    collection(db, 'tutor_grades'),
+                    where('teacherId', '==', currentTeacher.id),
+                    where('period', '==', currentPeriod),
+                    where('className', '==', className),
+                    where('subject', '==', subject)
+                );
+                
+                const tutorGradesSnap = await getDocs(tutorGradesQuery);
+                
+                if (tutorGradesSnap.empty) {
+                    showAlert('Aucune note publiée trouvée pour cette période', 'info');
+                    return;
+                }
+                
+                publishedGradesData = tutorGradesSnap.docs[0].data();
+            } else {
+                publishedGradesData = parentGradesSnap.docs[0].data();
             }
             
-            studentsSnap.forEach(doc => {
-                const student = doc.data();
-                const studentId = `${counter}`;
-                
-                // Initialiser les totaux
-                let totalCM = 0;
-                let totalCO = 0;
-                let totalPercentage = 0;
-                
-                // Récupérer les notes de chaque période source
-                sourcePeriods.forEach(async (period) => {
-                    try {
-                        const gradeQuery = query(
-                            collection(db, 'period_grades'),
-                            where('teacherId', '==', currentTeacher.id),
-                            where('period', '==', period),
-                            where('className', '==', className),
-                            where('subject', '==', subject)
-                        );
-                        
-                        const gradeSnap = await getDocs(gradeQuery);
-                        
-                        if (!gradeSnap.empty) {
-                            const gradeData = gradeSnap.docs[0].data();
-                            const studentGrade = gradeData.grades.find(g => g.studentMatricule === student.matricule);
-                            
-                            if (studentGrade) {
-                                totalCM += gradeData.maxPoints;
-                                totalCO += studentGrade.grade;
-                            }
-                        }
-                    } catch (error) {
-                        console.error(`Erreur chargement période ${period}:`, error);
-                    }
-                });
-                
-                // Calculer le pourcentage
-                const percentage = totalCM > 0 ? (totalCO / totalCM) * 100 : 0;
-                
-                periodGradesTable.push({
-                    id: studentId,
-                    matricule: student.matricule,
-                    fullName: student.fullName,
-                    grade: totalCO,
-                    maxPoints: totalCM,
-                    remark: 'Calcul automatique',
-                    percentage: percentage
-                });
-                
-                // Afficher la ligne avec les totaux calculés automatiquement
-                html += `
-                    <tr class="auto-calculated">
-                        <td>${counter}</td>
-                        <td>${student.matricule}</td>
-                        <td>${student.fullName}</td>
-                        <td>
-                            <input type="number" class="form-control" value="${totalCO.toFixed(2)}" readonly>
-                        </td>
-                        <td>
-                            <input type="number" class="form-control" value="${totalCM.toFixed(2)}" readonly>
-                        </td>
-                        <td id="percentage-${studentId}">${percentage.toFixed(2)}%</td>
-                        <td>Calcul automatique des périodes: ${sourcePeriods.join(', ')}</td>
-                    </tr>
-                `;
-                counter++;
-            });
+            // Stocker localement pour modification
+            localStorage.setItem(`grades_${currentTeacher.id}_${currentPeriod}_${className}_${subject}`, JSON.stringify(publishedGradesData));
             
-            document.getElementById('grades-table-body').innerHTML = html;
-            document.getElementById('excel-table-container').classList.remove('hidden');
+            // Charger les données dans le tableau
+            loadPublishedGradesIntoTable();
             
-            // Attendre un peu pour laisser le temps aux données de se charger
-            setTimeout(() => {
-                showAlert(`Données chargées automatiquement pour ${currentPeriod} à partir des périodes: ${sourcePeriods.join(', ')}`, 'success');
-            }, 500);
+            showAlert('Notes publiées chargées avec succès. Vous pouvez maintenant les modifier.', 'success');
             
         } catch (error) {
-            console.error('Erreur chargement notes auto-calculées:', error);
-            showAlert('Erreur lors du chargement des notes automatiques', 'error');
+            console.error('Erreur chargement notes publiées:', error);
+            showAlert('Erreur lors du chargement des notes publiées', 'error');
         }
+    }
+
+    // --- Charger les notes publiées dans le tableau ---
+    function loadPublishedGradesIntoTable() {
+        if (!publishedGradesData) {
+            showAlert('Aucune donnée à charger', 'error');
+            return;
+        }
+        
+        periodGradesTable = [];
+        
+        const maxPoints = publishedGradesData.maxPoints || 20;
+        document.getElementById('period-max-points').value = maxPoints;
+        
+        let html = '';
+        let counter = 1;
+        
+        publishedGradesData.grades.forEach(grade => {
+            const studentId = `${counter}`;
+            const percentage = maxPoints > 0 ? (grade.grade / maxPoints) * 100 : 0;
+            
+            periodGradesTable.push({
+                id: studentId,
+                matricule: grade.studentMatricule,
+                fullName: grade.studentName,
+                grade: grade.grade,
+                maxPoints: maxPoints,
+                remark: grade.remark || '',
+                percentage: percentage
+            });
+            
+            html += `
+                <tr>
+                    <td>${counter}</td>
+                    <td>${grade.studentMatricule}</td>
+                    <td>${grade.studentName}</td>
+                    <td>${maxPoints}</td>
+                    <td class="editable-cell" data-id="${studentId}" data-field="grade">
+                        <input type="number" class="grade-input" 
+                               value="${grade.grade}" 
+                               min="0" 
+                               max="${maxPoints}"
+                               step="0.5"
+                               onchange="updatePeriodGrade('${studentId}', 'grade', this.value)">
+                    </td>
+                    <td class="percentage-cell" id="percentage-${studentId}">${percentage.toFixed(2)}%</td>
+                    <td class="editable-cell" data-id="${studentId}" data-field="remark">
+                        <input type="text" class="form-control" 
+                               value="${grade.remark || ''}" 
+                               placeholder="Remarques" 
+                               onchange="updatePeriodGrade('${studentId}', 'remark', this.value)">
+                    </td>
+                </tr>
+            `;
+            counter++;
+        });
+        
+        document.getElementById('grades-table-body').innerHTML = html;
+        document.getElementById('excel-table-container').classList.remove('hidden');
     }
 
     // --- Mettre à jour une note dans le tableau ---
@@ -1613,8 +1607,6 @@
         
         const className = document.getElementById('period-class-select').value;
         const subject = document.getElementById('period-subject').value;
-        const gradeType = document.getElementById('period-grade-type').value;
-        const description = document.getElementById('period-evaluation-description').value;
         const evaluationDate = document.getElementById('period-evaluation-date').value;
         
         if (!className || !subject) {
@@ -1629,8 +1621,6 @@
                 period: currentPeriod,
                 className: className,
                 subject: subject,
-                gradeType: gradeType,
-                description: description,
                 evaluationDate: new Date(evaluationDate),
                 maxPoints: parseFloat(document.getElementById('period-max-points').value),
                 grades: periodGradesTable.map(grade => ({
@@ -1683,24 +1673,7 @@
 
     // --- Mettre à jour le tableau des notes ---
     async function updatePeriodGrades() {
-        // Pour les périodes de total, recharger les données
-        const isTotalPeriod = currentPeriod === 'TOTAL_S1' || currentPeriod === 'TOTAL_S2' || currentPeriod === 'TOTAL_GENERAL';
-        
-        if (isTotalPeriod) {
-            const className = document.getElementById('period-class-select').value;
-            const subject = document.getElementById('period-subject').value;
-            
-            if (!className || !subject) {
-                showAlert('Veuillez d\'abord sélectionner une classe et une matière', 'error');
-                return;
-            }
-            
-            await loadAutoCalculatedGrades(className, subject);
-            showAlert('Tableau recalculé avec les dernières données', 'success');
-            return;
-        }
-        
-        // Pour les autres périodes, recalculer les pourcentages
+        // Recalculer les pourcentages
         periodGradesTable.forEach(student => {
             if (student.maxPoints > 0) {
                 student.percentage = (student.grade / student.maxPoints) * 100;
@@ -1783,8 +1756,8 @@
                         <thead>
                             <tr>
                                 <th>Élève</th>
-                                <th>Note (CO)</th>
                                 <th>CM Max</th>
+                                <th>Note (CO)</th>
                                 <th>Pourcentage</th>
                                 <th>Remarques</th>
                             </tr>
@@ -1796,8 +1769,8 @@
                 html += `
                     <tr>
                         <td>${grade.studentName}</td>
-                        <td>${grade.grade}</td>
                         <td>${gradeData.maxPoints}</td>
+                        <td>${grade.grade}</td>
                         <td>${grade.percentage.toFixed(2)}%</td>
                         <td>${grade.remark || '-'}</td>
                     </tr>
@@ -1841,7 +1814,17 @@
             
             const gradeData = gradesSnap.docs[0].data();
             
-            // Publier dans la collection parent_grades
+            // Vérifier si des notes ont déjà été publiées aux parents
+            const existingParentQuery = query(
+                collection(db, 'parent_grades'),
+                where('teacherId', '==', currentTeacher.id),
+                where('period', '==', currentPeriod),
+                where('className', '==', className),
+                where('subject', '==', subject)
+            );
+            
+            const existingParentSnap = await getDocs(existingParentQuery);
+            
             const publicationData = {
                 ...gradeData,
                 destination: 'parents',
@@ -1850,9 +1833,16 @@
                 publishedBy: currentTeacher.fullName
             };
             
-            await addDoc(collection(db, 'parent_grades'), publicationData);
-            
-            showAlert('Notes publiées aux parents avec succès', 'success');
+            if (existingParentSnap.empty) {
+                // Nouvelle publication
+                await addDoc(collection(db, 'parent_grades'), publicationData);
+                showAlert('Notes publiées aux parents avec succès', 'success');
+            } else {
+                // Mise à jour de la publication existante
+                const docId = existingParentSnap.docs[0].id;
+                await updateDoc(doc(db, 'parent_grades', docId), publicationData);
+                showAlert('Notes mises à jour chez les parents avec succès', 'success');
+            }
             
         } catch (error) {
             console.error('Erreur publication parents:', error);
@@ -1889,7 +1879,17 @@
             
             const gradeData = gradesSnap.docs[0].data();
             
-            // Publier dans la collection tutor_grades
+            // Vérifier si des notes ont déjà été publiées aux titulaires
+            const existingTutorQuery = query(
+                collection(db, 'tutor_grades'),
+                where('teacherId', '==', currentTeacher.id),
+                where('period', '==', currentPeriod),
+                where('className', '==', className),
+                where('subject', '==', subject)
+            );
+            
+            const existingTutorSnap = await getDocs(existingTutorQuery);
+            
             const publicationData = {
                 ...gradeData,
                 destination: 'tutors',
@@ -1898,9 +1898,16 @@
                 publishedBy: currentTeacher.fullName
             };
             
-            await addDoc(collection(db, 'tutor_grades'), publicationData);
-            
-            showAlert('Notes publiées aux titulaires avec succès', 'success');
+            if (existingTutorSnap.empty) {
+                // Nouvelle publication
+                await addDoc(collection(db, 'tutor_grades'), publicationData);
+                showAlert('Notes publiées aux titulaires avec succès', 'success');
+            } else {
+                // Mise à jour de la publication existante
+                const docId = existingTutorSnap.docs[0].id;
+                await updateDoc(doc(db, 'tutor_grades', docId), publicationData);
+                showAlert('Notes mises à jour chez les titulaires avec succès', 'success');
+            }
             
         } catch (error) {
             console.error('Erreur publication titulaires:', error);
@@ -1945,7 +1952,13 @@
                 return;
             }
             
-            // Récupérer tous les cours publiés pour cette classe et période
+            // Pour les périodes de total, calculer automatiquement
+            if (period === 'TOTAL_S1' || period === 'TOTAL_S2' || period === 'TOTAL_GENERAL') {
+                await loadAutoCalculatedProclamationData(className, period);
+                return;
+            }
+            
+            // Pour les autres périodes, récupérer les notes publiées
             const tutorGradesQuery = query(
                 collection(db, 'tutor_grades'),
                 where('className', '==', className),
@@ -1971,7 +1984,7 @@
                 if (!coursesData[courseName]) {
                     coursesData[courseName] = {
                         teacherName: gradeData.teacherName,
-                        description: gradeData.description,
+                        maxPoints: gradeData.maxPoints,
                         grades: {}
                     };
                 }
@@ -2008,6 +2021,150 @@
             console.error('Erreur chargement proclamation:', error);
             showAlert('Erreur lors du chargement des données', 'error');
         }
+    }
+
+    // --- Charger les données de proclamation calculées automatiquement ---
+    async function loadAutoCalculatedProclamationData(className, period) {
+        try {
+            // Récupérer tous les élèves de la classe
+            const studentsQuery = query(collection(db, 'students'), where('class', '==', className));
+            const studentsSnap = await getDocs(studentsQuery);
+            
+            if (studentsSnap.empty) {
+                showAlert('Aucun élève trouvé dans cette classe', 'error');
+                return;
+            }
+            
+            const students = studentsSnap.docs.map(doc => doc.data());
+            
+            // Déterminer les périodes sources selon le total demandé
+            let sourcePeriods = [];
+            if (period === 'TOTAL_S1') {
+                sourcePeriods = ['P1', 'P2', 'EXAM_S1'];
+            } else if (period === 'TOTAL_S2') {
+                sourcePeriods = ['P3', 'P4', 'EXAM_S2'];
+            } else if (period === 'TOTAL_GENERAL') {
+                sourcePeriods = ['TOTAL_S1', 'TOTAL_S2'];
+            }
+            
+            // Récupérer tous les cours de la classe
+            const tutorGradesQuery = query(
+                collection(db, 'tutor_grades'),
+                where('className', '==', className)
+            );
+            
+            const tutorGradesSnap = await getDocs(tutorGradesQuery);
+            
+            // Organiser les données par cours
+            const coursesData = {};
+            
+            // Initialiser la structure des cours
+            tutorGradesSnap.forEach(doc => {
+                const gradeData = doc.data();
+                const courseName = gradeData.subject;
+                
+                if (!coursesData[courseName]) {
+                    coursesData[courseName] = {
+                        teacherName: gradeData.teacherName,
+                        grades: {}
+                    };
+                }
+            });
+            
+            // Pour chaque élève et chaque cours, calculer les totaux
+            students.forEach(student => {
+                Object.keys(coursesData).forEach(courseName => {
+                    let totalCM = 0;
+                    let totalCO = 0;
+                    
+                    // Pour les périodes TOTAL_S1 et TOTAL_S2, additionner les périodes sources
+                    if (period === 'TOTAL_S1' || period === 'TOTAL_S2') {
+                        sourcePeriods.forEach(sourcePeriod => {
+                            const gradeDataForPeriod = findGradeData(tutorGradesSnap, student.matricule, courseName, sourcePeriod);
+                            if (gradeDataForPeriod) {
+                                totalCM += gradeDataForPeriod.maxPoints;
+                                totalCO += gradeDataForPeriod.grade;
+                            }
+                        });
+                    }
+                    // Pour TOTAL_GENERAL, calculer la moyenne des deux semestres
+                    else if (period === 'TOTAL_GENERAL') {
+                        const totalS1 = calculateTotalForPeriod(student.matricule, courseName, 'TOTAL_S1', tutorGradesSnap);
+                        const totalS2 = calculateTotalForPeriod(student.matricule, courseName, 'TOTAL_S2', tutorGradesSnap);
+                        
+                        totalCM = (totalS1.cm + totalS2.cm) / 2;
+                        totalCO = (totalS1.co + totalS2.co) / 2;
+                    }
+                    
+                    const percentage = totalCM > 0 ? (totalCO / totalCM) * 100 : 0;
+                    
+                    coursesData[courseName].grades[student.matricule] = {
+                        studentName: student.fullName,
+                        cm: totalCM,
+                        co: totalCO,
+                        percentage: percentage
+                    };
+                });
+            });
+            
+            // Calculer les totaux par élève
+            const studentResults = calculateStudentResults(students, coursesData, period);
+            
+            // Afficher le tableau
+            displayTutorProclamationTable(students, coursesData, studentResults, period);
+            
+            // Stocker les données pour l'export
+            window.proclamationData = {
+                className: className,
+                period: period,
+                coursesData: coursesData,
+                studentResults: studentResults,
+                students: students
+            };
+            
+        } catch (error) {
+            console.error('Erreur chargement proclamation calculée:', error);
+            showAlert('Erreur lors du chargement des données calculées', 'error');
+        }
+    }
+
+    // --- Fonction utilitaire pour trouver les données de note ---
+    function findGradeData(tutorGradesSnap, studentMatricule, courseName, period) {
+        let foundData = null;
+        
+        tutorGradesSnap.forEach(doc => {
+            const data = doc.data();
+            if (data.subject === courseName && data.period === period) {
+                const studentGrade = data.grades.find(g => g.studentMatricule === studentMatricule);
+                if (studentGrade) {
+                    foundData = {
+                        maxPoints: data.maxPoints,
+                        grade: studentGrade.grade
+                    };
+                }
+            }
+        });
+        
+        return foundData;
+    }
+
+    // --- Calculer le total pour une période ---
+    function calculateTotalForPeriod(studentMatricule, courseName, period, tutorGradesSnap) {
+        let totalCM = 0;
+        let totalCO = 0;
+        
+        tutorGradesSnap.forEach(doc => {
+            const data = doc.data();
+            if (data.subject === courseName) {
+                const studentGrade = data.grades.find(g => g.studentMatricule === studentMatricule);
+                if (studentGrade) {
+                    totalCM += data.maxPoints;
+                    totalCO += studentGrade.grade;
+                }
+            }
+        });
+        
+        return { cm: totalCM, co: totalCO };
     }
 
     // --- Calculer les résultats des élèves ---
@@ -2088,7 +2245,8 @@
         
         // En-têtes des cours (sur 2 lignes)
         courseNames.forEach(courseName => {
-            html += `<th colspan="2">${courseName}</th>`;
+            const teacher = coursesData[courseName].teacherName;
+            html += `<th colspan="3">${courseName}<br><small>${teacher}</small></th>`;
         });
         
         html += `
@@ -2097,30 +2255,23 @@
                     <tr>
         `;
         
-        // Sous-en-têtes CM et CO pour chaque cours
+        // Sous-en-têtes CM, CO et % pour chaque cours
         courseNames.forEach(() => {
             html += `
                 <th>CM</th>
                 <th>CO</th>
+                <th>%</th>
             `;
         });
         
         html += `
-                <th>Total CM</th>
-                <th>Total CO</th>
-                <th>Pourcentage</th>
+                <th>CM Total</th>
+                <th>CO Total</th>
+                <th>% Global</th>
             </tr>
         `;
         
-        // Informations sur les enseignants
-        html += `<tr><td colspan="3"><small>Enseignants:</small></td>`;
-        
-        courseNames.forEach(courseName => {
-            const teacher = coursesData[courseName].teacherName;
-            html += `<td colspan="2"><small>${teacher}</small></td>`;
-        });
-        
-        html += `<td colspan="3"></td></tr></thead><tbody>`;
+        html += '</thead><tbody>';
         
         // Données des élèves triés par classement
         studentResults.forEach(student => {
@@ -2146,8 +2297,9 @@
                 const percentageClass = course.percentage >= 50 ? 'grade-pass' : 'grade-fail';
                 
                 html += `
-                    <td>${course.cm}</td>
-                    <td class="${percentageClass}">${course.co.toFixed(2)}</td>
+                    <td>${course.cm.toFixed(2)}</td>
+                    <td>${course.co.toFixed(2)}</td>
+                    <td class="${percentageClass}">${course.percentage.toFixed(2)}%</td>
                 `;
             });
             
@@ -2172,7 +2324,8 @@
             
             html += `
                 <td><strong>${courseAverages.cm.toFixed(2)}</strong></td>
-                <td class="${percentageClass}"><strong>${courseAverages.co.toFixed(2)}</strong></td>
+                <td><strong>${courseAverages.co.toFixed(2)}</strong></td>
+                <td class="${percentageClass}"><strong>${courseAverages.percentage.toFixed(2)}%</strong></td>
             `;
         });
         
@@ -2301,9 +2454,9 @@
             // En-têtes de colonnes
             const headers = ['Classement', 'Matricule', 'Nom Complet'];
             courseNames.forEach(courseName => {
-                headers.push(`${courseName} CM`, `${courseName} CO`);
+                headers.push(`${courseName} CM`, `${courseName} CO`, `${courseName} %`);
             });
-            headers.push('Total CM', 'Total CO', 'Pourcentage');
+            headers.push('Total CM', 'Total CO', 'Pourcentage Global');
             excelData.push(headers);
             
             // Données des élèves
@@ -2316,7 +2469,11 @@
                 
                 courseNames.forEach(courseName => {
                     const course = student.courses[courseName];
-                    row.push(course.cm, course.co.toFixed(2));
+                    row.push(
+                        course.cm.toFixed(2),
+                        course.co.toFixed(2),
+                        `${course.percentage.toFixed(2)}%`
+                    );
                 });
                 
                 row.push(
@@ -2332,7 +2489,11 @@
             const averagesRow = ['MOYENNE CLASSE', '', ''];
             courseNames.forEach(courseName => {
                 const courseAvg = calculateCourseAverage(studentResults, courseName);
-                averagesRow.push(courseAvg.cm.toFixed(2), courseAvg.co.toFixed(2));
+                averagesRow.push(
+                    courseAvg.cm.toFixed(2),
+                    courseAvg.co.toFixed(2),
+                    `${courseAvg.percentage.toFixed(2)}%`
+                );
             });
             
             const classAvg = calculateClassAverages(studentResults);
@@ -2423,10 +2584,6 @@
             const { className, period, coursesData, studentResults } = window.proclamationData;
             const courseNames = Object.keys(coursesData);
             
-            // Importer docx dynamiquement
-            const docxModule = await import('https://unpkg.com/docx@7.1.0/build/index.js');
-            const docx = docxModule;
-            
             // Préparer le contenu Word
             const docContent = [];
             
@@ -2513,12 +2670,13 @@
                 ].concat(
                     courseNames.flatMap(courseName => [
                         new docx.TableCell({ children: [new docx.Paragraph(`${courseName} CM`)] }),
-                        new docx.TableCell({ children: [new docx.Paragraph(`${courseName} CO`)] })
+                        new docx.TableCell({ children: [new docx.Paragraph(`${courseName} CO`)] }),
+                        new docx.TableCell({ children: [new docx.Paragraph(`${courseName} %`)] })
                     ])
                 ).concat([
                     new docx.TableCell({ children: [new docx.Paragraph("Total CM")] }),
                     new docx.TableCell({ children: [new docx.Paragraph("Total CO")] }),
-                    new docx.TableCell({ children: [new docx.Paragraph("Pourcentage")] })
+                    new docx.TableCell({ children: [new docx.Paragraph("% Global")] })
                 ])
             });
             
@@ -2545,12 +2703,15 @@
                 
                 courseNames.forEach(courseName => {
                     const course = student.courses[courseName];
+                    const percentageColor = course.percentage >= 50 ? "2E7D32" : "C62828";
+                    
                     cells.push(
-                        new docx.TableCell({ children: [new docx.Paragraph(course.cm.toString())] }),
+                        new docx.TableCell({ children: [new docx.Paragraph(course.cm.toFixed(2))] }),
+                        new docx.TableCell({ children: [new docx.Paragraph(course.co.toFixed(2))] }),
                         new docx.TableCell({ 
                             children: [new docx.Paragraph({
-                                text: course.co.toFixed(2),
-                                color: course.percentage >= 50 ? "2E7D32" : "C62828"
+                                text: `${course.percentage.toFixed(2)}%`,
+                                color: percentageColor
                             })]
                         })
                     );
@@ -2609,6 +2770,12 @@
                     new docx.TableCell({ 
                         children: [new docx.Paragraph({
                             text: courseAvg.co.toFixed(2),
+                            bold: true
+                        })]
+                    }),
+                    new docx.TableCell({ 
+                        children: [new docx.Paragraph({
+                            text: `${courseAvg.percentage.toFixed(2)}%`,
                             bold: true,
                             color: percentageColor
                         })]
@@ -2711,6 +2878,149 @@
         } catch (error) {
             console.error('Erreur export Word:', error);
             showAlert('Erreur lors de l\'export Word: ' + error.message, 'error');
+        }
+    }
+
+    // --- Exporter en PDF ---
+    async function downloadProclamationPDF() {
+        if (!window.proclamationData) {
+            showAlert('Veuillez d\'abord charger les données', 'error');
+            return;
+        }
+        
+        try {
+            const { className, period, coursesData, studentResults } = window.proclamationData;
+            const courseNames = Object.keys(coursesData);
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('landscape');
+            
+            // Titre
+            doc.setFontSize(16);
+            doc.setTextColor(40, 40, 40);
+            doc.text(`PROCLAMATION DES NOTES - ${className}`, 15, 15);
+            
+            doc.setFontSize(12);
+            doc.text(`Période: ${getPeriodName(period)}`, 15, 25);
+            doc.text(`Date d'export: ${new Date().toLocaleDateString('fr-FR')}`, 15, 30);
+            
+            // Tableau
+            const headers = ['Class.', 'Matricule', 'Nom'];
+            courseNames.forEach(courseName => {
+                headers.push(`${courseName} CM`, `${courseName} CO`, `${courseName} %`);
+            });
+            headers.push('CM Total', 'CO Total', '% Global');
+            
+            const data = [];
+            studentResults.forEach(student => {
+                const row = [
+                    student.ranking.toString(),
+                    student.matricule || '',
+                    student.fullName
+                ];
+                
+                courseNames.forEach(courseName => {
+                    const course = student.courses[courseName];
+                    row.push(
+                        course.cm.toFixed(2),
+                        course.co.toFixed(2),
+                        `${course.percentage.toFixed(2)}%`
+                    );
+                });
+                
+                row.push(
+                    student.totalCM.toFixed(2),
+                    student.totalCO.toFixed(2),
+                    `${student.overallPercentage.toFixed(2)}%`
+                );
+                
+                data.push(row);
+            });
+            
+            // Ajouter les moyennes de classe
+            const averagesRow = ['Moy.', '', ''];
+            courseNames.forEach(courseName => {
+                const courseAvg = calculateCourseAverage(studentResults, courseName);
+                averagesRow.push(
+                    courseAvg.cm.toFixed(2),
+                    courseAvg.co.toFixed(2),
+                    `${courseAvg.percentage.toFixed(2)}%`
+                );
+            });
+            
+            const classAvg = calculateClassAverages(studentResults);
+            averagesRow.push(
+                classAvg.totalCM.toFixed(2),
+                classAvg.totalCO.toFixed(2),
+                `${classAvg.percentage.toFixed(2)}%`
+            );
+            
+            data.push(averagesRow);
+            
+            // Configuration du tableau
+            doc.autoTable({
+                head: [headers],
+                body: data,
+                startY: 40,
+                theme: 'grid',
+                styles: {
+                    fontSize: 8,
+                    cellPadding: 2,
+                    overflow: 'linebreak'
+                },
+                headStyles: {
+                    fillColor: [44, 62, 80], // Couleur primaire
+                    textColor: [255, 255, 255],
+                    fontStyle: 'bold'
+                },
+                columnStyles: {
+                    0: { cellWidth: 15 }, // Classement
+                    1: { cellWidth: 30 }, // Matricule
+                    2: { cellWidth: 40 }  // Nom
+                },
+                willDrawCell: function(data) {
+                    // Mettre en évidence les pourcentages
+                    if (data.column.index >= 3 && (data.column.index - 3) % 3 === 2) {
+                        const value = data.cell.raw;
+                        const percentage = parseFloat(value);
+                        if (!isNaN(percentage)) {
+                            if (percentage >= 50) {
+                                data.cell.styles.textColor = [46, 125, 50]; // Vert
+                            } else {
+                                data.cell.styles.textColor = [198, 40, 40]; // Rouge
+                            }
+                        }
+                    }
+                    
+                    // Mettre en évidence la dernière ligne (moyennes)
+                    if (data.row.index === data.table.body.length - 1) {
+                        data.cell.styles.fontStyle = 'bold';
+                        data.cell.styles.fillColor = [187, 222, 251]; // Bleu clair
+                    }
+                    
+                    // Mettre en évidence les trois premiers
+                    if (data.column.index === 0 && data.row.index < studentResults.length) {
+                        const ranking = parseInt(data.cell.raw);
+                        if (ranking === 1) {
+                            data.cell.styles.fillColor = [255, 215, 0]; // Or
+                        } else if (ranking === 2) {
+                            data.cell.styles.fillColor = [192, 192, 192]; // Argent
+                        } else if (ranking === 3) {
+                            data.cell.styles.fillColor = [205, 127, 50]; // Bronze
+                        }
+                    }
+                }
+            });
+            
+            // Sauvegarder le PDF
+            const fileName = `Proclamation_${className}_${period}_${new Date().toISOString().split('T')[0]}.pdf`;
+            doc.save(fileName);
+            
+            showAlert('Fichier PDF téléchargé avec succès', 'success');
+            
+        } catch (error) {
+            console.error('Erreur export PDF:', error);
+            showAlert('Erreur lors de l\'export PDF: ' + error.message, 'error');
         }
     }
 
