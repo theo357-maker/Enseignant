@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Espace Enseignant - CS la Colombe</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -11,11 +11,9 @@
     <script src="https://unpkg.com/docx@7.1.0/build/index.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
-
- <!-- Service Worker et mise à jour -->
+    <!-- Service Worker et mise à jour -->
     <meta name="version" content="2.1.0">
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
-
 
     <!-- PWA Meta Tags -->
     <meta name="application-name" content="TheoVêt">
@@ -29,9 +27,6 @@
     <meta name="msapplication-tap-highlight" content="no">
     <meta name="theme-color" content="#3498db">
 
-    <!-- Service Worker et mise à jour -->
- 
-
     <!-- Apple Touch Icons -->
     <link rel="apple-touch-icon" href="icon-192x192.png">
     <link rel="apple-touch-icon" sizes="192x192" href="icon-192x192.png">
@@ -40,8 +35,6 @@
 
     <!-- Manifest -->
     <link rel="manifest" href="manifest.json">
-
-
 
     <!-- Styles et Bibliothèques -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -54,8 +47,8 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 
-<!-- Scripts de mise à jour -->
-<script src="update-system.js"></script>
+    <!-- Scripts de mise à jour -->
+    <script src="update-system.js"></script>
 
     <style>
         :root {
@@ -63,11 +56,40 @@
             --danger: #e74c3c; --warning: #f39c12; --info: #1abc9c;
             --light: #ecf0f1; --dark: #34495e;
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f5f6fa; }
-        .hidden { display: none !important; }
-
-        /* --- Styles Communs --- */
+        
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        html {
+            font-size: 16px;
+            -webkit-text-size-adjust: 100%;
+        }
+        
+        body { 
+            font-family: 'Segoe UI', 'Roboto', sans-serif; 
+            background-color: #f5f6fa;
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 100vw;
+        }
+        
+        .hidden { 
+            display: none !important; 
+        }
+        
+        /* --- Styles Responsive Communs --- */
+        .container {
+            width: 100%;
+            max-width: 100%;
+            padding: 0 15px;
+            margin: 0 auto;
+        }
+        
+        /* --- Login Overlay --- */
         .login-overlay { 
             position: fixed; 
             top: 0; 
@@ -79,37 +101,238 @@
             justify-content: center; 
             align-items: center; 
             z-index: 2000; 
+            padding: 20px;
         }
+        
         .login-card { 
             background: white; 
-            padding: 3rem; 
+            padding: 2rem; 
             border-radius: 10px; 
-            width: 90%; 
+            width: 100%; 
             max-width: 400px; 
-            text-align: center; 
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
-        .app-container { display: flex; min-height: 100vh; }
-        .sidebar { width: 250px; background: white; box-shadow: 2px 0 10px rgba(0,0,0,0.08); flex-shrink: 0; }
-        .nav-menu { list-style: none; padding: 1rem 0; margin: 0; }
-        .nav-menu li a { display: flex; align-items: center; gap: 12px; padding: 14px 20px; color: var(--dark); text-decoration: none; font-weight: 500; }
-        .nav-menu li a.active, .nav-menu li a:hover { background: #eaf5fc; color: var(--primary); }
-        .main-content { flex: 1; display: flex; flex-direction: column; }
-        .app-header { background: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; }
-        .content-area { padding: 2rem; }
-        .page { display: none; }
-        .page.active { display: block; }
-        .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: 500; color: white; }
+        
+        /* --- App Container --- */
+        .app-container { 
+            display: flex; 
+            min-height: 100vh;
+            flex-direction: column;
+        }
+        
+        /* --- Header Mobile --- */
+        .mobile-header {
+            display: none;
+            background: white;
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .mobile-header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .mobile-menu-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--primary);
+            cursor: pointer;
+            padding: 5px;
+        }
+        
+        .mobile-header-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        /* --- Sidebar Mobile --- */
+        .sidebar-mobile-overlay {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            transition: left 0.3s ease;
+        }
+        
+        .sidebar-mobile-overlay.active {
+            left: 0;
+        }
+        
+        .sidebar {
+            width: 250px; 
+            background: white; 
+            box-shadow: 2px 0 10px rgba(0,0,0,0.08); 
+            flex-shrink: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 1000;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .sidebar.active {
+            transform: translateX(0);
+        }
+        
+        .nav-menu { 
+            list-style: none; 
+            padding: 1rem 0; 
+            margin: 0; 
+        }
+        
+        .nav-menu li a { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            padding: 14px 20px; 
+            color: var(--dark); 
+            text-decoration: none; 
+            font-weight: 500;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+        
+        .nav-menu li a.active, 
+        .nav-menu li a:hover { 
+            background: #eaf5fc; 
+            color: var(--primary); 
+            border-left-color: var(--primary);
+        }
+        
+        .main-content { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column;
+            width: 100%;
+            margin-left: 0;
+            transition: margin-left 0.3s ease;
+        }
+        
+        /* --- Header Desktop --- */
+        .app-header { 
+            background: white; 
+            padding: 1rem 2rem; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-bottom: 1px solid #eee;
+            position: sticky;
+            top: 0;
+            z-index: 99;
+        }
+        
+        .content-area { 
+            padding: 1.5rem; 
+            flex: 1;
+            width: 100%;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+        
+        .page { 
+            display: none; 
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .page.active { 
+            display: block; 
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* --- Buttons --- */
+        .btn { 
+            padding: 10px 20px; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-weight: 500; 
+            color: white;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
         .btn-primary { background: var(--primary); }
         .btn-success { background: var(--success); }
         .btn-danger { background: var(--danger); }
         .btn-warning { background: var(--warning); }
         .btn-info { background: var(--info); }
         .btn-secondary { background: var(--secondary); }
-        .form-control { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
-        .form-group { margin-bottom: 1rem; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; }
-        .card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 1.5rem; }
-        .profile-card { display: flex; align-items: center; gap: 1.5rem; }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-sm { 
+            padding: 6px 12px; 
+            font-size: 0.8rem; 
+        }
+        
+        /* --- Forms --- */
+        .form-control { 
+            width: 100%; 
+            padding: 10px; 
+            border: 1px solid #ddd; 
+            border-radius: 5px; 
+            box-sizing: border-box;
+            font-size: 0.95rem;
+        }
+        
+        .form-group { 
+            margin-bottom: 1rem; 
+        }
+        
+        .form-group label { 
+            display: block; 
+            margin-bottom: 5px; 
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        /* --- Cards --- */
+        .card { 
+            background: white; 
+            padding: 1.5rem; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        
+        .profile-card { 
+            display: flex; 
+            align-items: center; 
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
         .profile-avatar { 
             width: 80px; 
             height: 80px; 
@@ -121,155 +344,246 @@
             justify-content: center; 
             font-size: 2rem; 
             overflow: hidden;
+            flex-shrink: 0;
         }
+        
         .profile-avatar img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
-        .teacher-photo-header {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--primary);
+        
+        /* --- Stats Grid --- */
+        .stats-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 1rem; 
         }
-        .photo-placeholder-header {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--primary);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1rem;
+        
+        .stat-card { 
+            text-align: center; 
+            padding: 1rem;
         }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; }
-        .stat-card { text-align: center; }
-        .stat-card h3 { font-size: 1rem; color: #555; margin-bottom: 0.5rem; }
-        .stat-card span { font-size: 2rem; font-weight: bold; color: var(--dark); }
-        .alert { padding: 1rem; border-radius: 5px; margin-bottom: 1rem; }
-        .alert-success { background: #d4edda; color: #155724; }
-        .alert-error { background: #f8d7da; color: #721c24; }
-        .alert-info { background: #d1ecf1; color: #0c5460; }
-        .tabs { display: flex; border-bottom: 1px solid #ddd; margin-bottom: 1.5rem; }
-        .tab { padding: 10px 20px; cursor: pointer; border-bottom: 2px solid transparent; }
-        .tab.active { border-bottom: 2px solid var(--primary); color: var(--primary); font-weight: 500; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .table-container { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; }
-        th { background-color: #f8f9fa; font-weight: 600; }
-        tr:hover { background-color: #f8f9fa; }
-        .classes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
-        .class-card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-left: 4px solid var(--primary); }
-        .grade-red { background-color: #ffebee; color: #c62828; font-weight: bold; }
-        .grade-green { background-color: #e8f5e8; color: #2e7d32; font-weight: bold; }
-        .grade-input { width: 80px; padding: 5px; border: 1px solid #ddd; border-radius: 4px; text-align: center; }
-        .action-buttons { display: flex; gap: 0.5rem; }
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background: white; padding: 2rem; border-radius: 10px; width: 90%; max-width: 800px; max-height: 90vh; overflow-y: auto; }
-
-        /* Styles pour les notifications de mise à jour */
-        .update-toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: white;
-            border-left: 4px solid #3498db;
+        
+        .stat-card h3 { 
+            font-size: 0.9rem; 
+            color: #555; 
+            margin-bottom: 0.5rem; 
+        }
+        
+        .stat-card span { 
+            font-size: 1.8rem; 
+            font-weight: bold; 
+            color: var(--dark); 
+        }
+        
+        /* --- Alerts --- */
+        .alert { 
+            padding: 1rem; 
+            border-radius: 5px; 
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .alert-success { 
+            background: #d4edda; 
+            color: #155724; 
+            border-left: 4px solid #28a745;
+        }
+        
+        .alert-error { 
+            background: #f8d7da; 
+            color: #721c24; 
+            border-left: 4px solid #dc3545;
+        }
+        
+        .alert-info { 
+            background: #d1ecf1; 
+            color: #0c5460; 
+            border-left: 4px solid #17a2b8;
+        }
+        
+        /* --- Tabs --- */
+        .tabs { 
+            display: flex; 
+            border-bottom: 1px solid #ddd; 
+            margin-bottom: 1.5rem;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .tab { 
+            padding: 10px 20px; 
+            cursor: pointer; 
+            border-bottom: 2px solid transparent; 
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        
+        .tab.active { 
+            border-bottom: 2px solid var(--primary); 
+            color: var(--primary); 
+            font-weight: 500; 
+        }
+        
+        .tab-content { 
+            display: none; 
+        }
+        
+        .tab-content.active { 
+            display: block; 
+        }
+        
+        /* --- Tables --- */
+        .table-container { 
+            overflow-x: auto; 
+            -webkit-overflow-scrolling: touch;
+            margin: 1rem 0;
             border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-            padding: 15px 20px;
-            min-width: 300px;
-            max-width: 400px;
-            z-index: 9999;
-            transform: translateX(120%);
-            transition: transform 0.3s ease;
-        }
-
-        .update-toast.show {
-            transform: translateX(0);
-        }
-
-        .update-toast.success {
-            border-left-color: #27ae60;
-        }
-
-        .update-toast.warning {
-            border-left-color: #f39c12;
-        }
-
-        .update-toast.danger {
-            border-left-color: #e74c3c;
+            border: 1px solid #eee;
         }
         
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
-        .close-modal { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666; }
-        .export-options { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
-        .loading { text-align: center; padding: 2rem; color: #666; }
-        .student-photo { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
-        .photo-placeholder { width: 40px; height: 40px; border-radius: 50%; background: #eee; display: flex; align-items: center; justify-content: center; color: #999; }
-        .attendance-actions { display: flex; gap: 0.5rem; }
-        .attendance-status { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
-        .present { background-color: #e8f5e8; color: #2e7d32; }
-        .absent { background-color: #ffebee; color: #c62828; }
-        .late { background-color: #fff3e0; color: #ef6c00; }
-        .homework-card { border-left: 4px solid var(--info); margin-bottom: 1rem; }
-        .homework-actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
-        .submission-card { border-left: 4px solid var(--warning); margin-top: 1rem; }
-        .grade-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
-        .schedule-table { width: 100%; }
-        .schedule-table th { background-color: var(--primary); color: white; }
-        .schedule-table td { text-align: center; padding: 10px; }
-        .schedule-table .current-time { background-color: #e3f2fd; }
-        .file-upload { border: 2px dashed #ddd; padding: 2rem; text-align: center; border-radius: 8px; margin-bottom: 1rem; }
-        .file-upload.active { border-color: var(--primary); background-color: #eaf5fc; }
-        .file-preview { max-width: 200px; max-height: 200px; margin-top: 1rem; }
-        .timetable-day { margin-bottom: 2rem; }
-        .timetable-day h4 { background-color: var(--primary); color: white; padding: 0.5rem 1rem; border-radius: 4px; margin-bottom: 0.5rem; }
-        .timetable-session { display: flex; justify-content: space-between; padding: 0.5rem; border-bottom: 1px solid #eee; }
-        .timetable-session.current { background-color: #e3f2fd; }
-        .grades-table input { width: 80px; }
-        .btn-sm { padding: 5px 10px; font-size: 0.8rem; }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 0;
+            min-width: 600px;
+        }
         
-        /* --- Styles pour la proclamation --- */
-        .proclamation-table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
-        .proclamation-table th, .proclamation-table td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-        .proclamation-table th { background-color: #f8f9fa; font-weight: bold; }
-        .proclamation-table .sub-header { background-color: #e9ecef; }
-        .grade-pass { background-color: #d4edda; color: #155724; }
-        .grade-fail { background-color: #f8d7da; color: #721c24; }
-        .teacher-section { margin-bottom: 2rem; border: 1px solid #ddd; padding: 1rem; border-radius: 5px; }
-        .teacher-section h4 { margin-bottom: 1rem; color: var(--primary); }
+        th, td { 
+            padding: 12px 15px; 
+            text-align: left; 
+            border-bottom: 1px solid #eee; 
+            font-size: 0.9rem;
+        }
         
-        /* Nouveaux styles pour le système par période */
+        th { 
+            background-color: #f8f9fa; 
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+        
+        tr:hover { 
+            background-color: #f8f9fa; 
+        }
+        
+        /* --- Classes Grid --- */
+        .classes-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+            gap: 1rem; 
+        }
+        
+        .class-card { 
+            background: white; 
+            padding: 1.5rem; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+            border-left: 4px solid var(--primary); 
+        }
+        
+        /* --- Grades --- */
+        .grade-red { 
+            background-color: #ffebee; 
+            color: #c62828; 
+            font-weight: bold; 
+        }
+        
+        .grade-green { 
+            background-color: #e8f5e8; 
+            color: #2e7d32; 
+            font-weight: bold; 
+        }
+        
+        .grade-input { 
+            width: 80px; 
+            padding: 5px; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+            text-align: center; 
+            font-size: 0.9rem;
+        }
+        
+        /* --- Modals --- */
+        .modal { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0,0,0,0.7); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            z-index: 1000;
+            padding: 20px;
+        }
+        
+        .modal-content { 
+            background: white; 
+            padding: 1.5rem; 
+            border-radius: 10px; 
+            width: 100%; 
+            max-width: 800px; 
+            max-height: 90vh; 
+            overflow-y: auto;
+        }
+        
+        .modal-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 1.5rem; 
+        }
+        
+        .close-modal { 
+            background: none; 
+            border: none; 
+            font-size: 1.5rem; 
+            cursor: pointer; 
+            color: #666; 
+            padding: 5px;
+        }
+        
+        /* --- Responsive Utilities --- */
+        .mobile-only { display: none; }
+        .desktop-only { display: block; }
+        
+        /* --- Nouveaux styles pour le système par période --- */
         .period-selector { 
             display: flex; 
             gap: 10px; 
             margin-bottom: 20px; 
             flex-wrap: wrap; 
+            overflow-x: auto;
+            padding-bottom: 10px;
         }
+        
         .period-option {
-            padding: 10px 20px;
+            padding: 12px 20px;
             border: 2px solid var(--primary);
             border-radius: 5px;
             cursor: pointer;
             font-weight: 500;
             transition: all 0.3s;
             text-align: center;
-            min-width: 150px;
+            min-width: 140px;
+            flex-shrink: 0;
         }
+        
         .period-option:hover {
             background-color: var(--primary);
             color: white;
         }
+        
         .period-option.selected {
             background-color: var(--primary);
             color: white;
             transform: scale(1.05);
         }
+        
         .period-description {
             background-color: #f8f9fa;
             padding: 15px;
@@ -277,52 +591,58 @@
             margin-bottom: 20px;
             border-left: 4px solid var(--info);
         }
+        
         .excel-like-table {
             width: 100%;
             border-collapse: collapse;
+            min-width: 800px;
         }
+        
         .excel-like-table th {
             background-color: #2c3e50;
             color: white;
             padding: 12px;
             border: 1px solid #ddd;
+            font-size: 0.85rem;
         }
+        
         .excel-like-table td {
             padding: 10px;
             border: 1px solid #ddd;
             text-align: center;
+            font-size: 0.85rem;
         }
+        
         .excel-like-table tr:nth-child(even) {
             background-color: #f9f9f9;
         }
+        
         .excel-like-table tr:hover {
             background-color: #eaf5fc;
         }
+        
         .editable-cell {
             cursor: pointer;
             position: relative;
         }
+        
         .editable-cell input {
             width: 100%;
             height: 100%;
             border: 2px solid var(--primary);
             text-align: center;
             font-weight: bold;
+            font-size: 0.9rem;
+            padding: 5px;
         }
-        .calculation-row {
-            background-color: #e8f5e9 !important;
-            font-weight: bold;
-        }
-        .total-row {
-            background-color: #bbdefb !important;
-            font-weight: bold;
-        }
+        
         .period-summary {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 15px;
             margin-top: 20px;
         }
+        
         .summary-card {
             background: white;
             padding: 15px;
@@ -330,26 +650,32 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             text-align: center;
         }
+        
         .summary-card h4 {
             margin-bottom: 10px;
             color: var(--dark);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
+        
         .summary-card .value {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             font-weight: bold;
             color: var(--primary);
         }
+        
         .download-options {
             display: flex;
             gap: 10px;
             margin-top: 20px;
+            flex-wrap: wrap;
         }
+        
         .download-options button {
             display: flex;
             align-items: center;
             gap: 8px;
         }
+        
         .ranking-badge {
             display: inline-block;
             padding: 4px 8px;
@@ -360,23 +686,202 @@
             min-width: 30px;
             text-align: center;
         }
+        
         .ranking-1 { background-color: #ffd700; color: #000; }
         .ranking-2 { background-color: #c0c0c0; color: #000; }
         .ranking-3 { background-color: #cd7f32; color: #000; }
         
-        /* Style pour les totaux automatiques */
-        .auto-calculated {
-            background-color: #e8f5e9 !important;
-            font-weight: bold;
-            color: #155724;
+        /* --- Styles Responsive --- */
+        @media screen and (max-width: 1200px) {
+            .app-header {
+                padding: 1rem;
+            }
+            
+            .content-area {
+                padding: 1rem;
+            }
         }
-        .auto-calculated input {
-            background-color: transparent;
-            border: none;
-            font-weight: bold;
-            color: #155724;
-            text-align: center;
-            pointer-events: none;
+        
+        @media screen and (max-width: 992px) {
+            html {
+                font-size: 15px;
+            }
+            
+            .classes-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media screen and (max-width: 768px) {
+            .mobile-only { display: block; }
+            .desktop-only { display: none; }
+            
+            .mobile-header {
+                display: block;
+            }
+            
+            .app-header {
+                padding: 0.8rem;
+            }
+            
+            .main-content {
+                margin-left: 0 !important;
+            }
+            
+            .sidebar {
+                width: 280px;
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .profile-card {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+            
+            .classes-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .btn {
+                padding: 10px 15px;
+                font-size: 0.85rem;
+            }
+            
+            .card {
+                padding: 1rem;
+            }
+            
+            .modal-content {
+                padding: 1rem;
+                margin: 10px;
+            }
+            
+            .period-option {
+                min-width: 120px;
+                padding: 10px 15px;
+            }
+        }
+        
+        @media screen and (max-width: 576px) {
+            html {
+                font-size: 14px;
+            }
+            
+            .login-card {
+                padding: 1.5rem;
+            }
+            
+            .content-area {
+                padding: 0.8rem;
+            }
+            
+            .tabs {
+                padding-bottom: 5px;
+            }
+            
+            .tab {
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
+            
+            th, td {
+                padding: 8px 10px;
+            }
+            
+            .download-options {
+                flex-direction: column;
+            }
+            
+            .download-options button {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 0.5rem !important;
+            }
+            
+            .form-row .form-group {
+                width: 100%;
+            }
+            
+            .period-selector {
+                gap: 5px;
+            }
+            
+            .period-option {
+                min-width: calc(50% - 5px);
+                font-size: 0.85rem;
+            }
+        }
+        
+        @media screen and (max-width: 400px) {
+            .period-option {
+                min-width: 100%;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+            
+            .homework-actions {
+                flex-direction: column;
+            }
+            
+            .homework-actions .btn {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+        }
+        
+        /* --- Améliorations pour le tactile --- */
+        button, 
+        select, 
+        input[type="checkbox"],
+        input[type="radio"],
+        .tab {
+            min-height: 44px;
+            min-width: 44px;
+        }
+        
+        input, 
+        select, 
+        textarea {
+            font-size: 16px; /* Évite le zoom automatique sur iOS */
+        }
+        
+        /* --- Scrollbar personnalisée --- */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
         }
     </style>
 </head>
@@ -428,10 +933,35 @@
 
     <!-- Contenu de l'application -->
     <div id="app-root" class="app-container hidden">
-        <nav class="sidebar">
+        <!-- Header Mobile -->
+        <div class="mobile-header mobile-only">
+            <div class="mobile-header-content">
+                <button class="mobile-menu-btn" id="mobile-menu-btn">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="mobile-header-title" id="mobile-page-title">Tableau de bord</div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div id="mobile-teacher-photo"></div>
+                    <button id="mobile-logout-btn" class="btn btn-danger btn-sm">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Overlay pour fermer le menu mobile -->
+        <div class="sidebar-mobile-overlay" id="sidebar-overlay"></div>
+
+        <!-- Sidebar -->
+        <nav class="sidebar" id="sidebar">
             <div style="padding: 1.5rem; text-align: center; border-bottom: 1px solid #eee;">
                 <i class="fas fa-chalkboard-teacher" style="font-size: 2rem; color: var(--primary);"></i>
-                <h3 style="margin-top: 0.5rem;">Espace Enseignant</h3>
+                <h3 style="margin-top: 0.5rem; font-size: 1.1rem;">Espace Enseignant</h3>
+                <div class="mobile-only" style="margin-top: 1rem;">
+                    <button class="btn btn-secondary btn-sm" id="close-sidebar-btn" style="width: 100%;">
+                        <i class="fas fa-times"></i> Fermer le menu
+                    </button>
+                </div>
             </div>
             <ul class="nav-menu">
                 <li><a href="#" class="active" data-page="dashboard"><i class="fas fa-tachometer-alt fa-fw"></i> Tableau de bord</a></li>
@@ -445,9 +975,11 @@
                 <li><a href="#" data-page="profile"><i class="fas fa-user fa-fw"></i> Mon Profil</a></li>
             </ul>
         </nav>
-        <div class="main-content">
-            <header class="app-header">
-                <h2 id="page-title">Tableau de bord</h2>
+        
+        <div class="main-content" id="main-content">
+            <!-- Header Desktop -->
+            <header class="app-header desktop-only">
+                <h2 id="page-title" style="font-size: 1.5rem;">Tableau de bord</h2>
                 <div style="display: flex; align-items: center; gap: 1rem;">
                     <!-- Photo de profil dans l'en-tête -->
                     <div id="teacher-photo-header">
@@ -457,6 +989,7 @@
                     <button id="logout-btn" class="btn btn-danger">Déconnexion</button>
                 </div>
             </header>
+            
             <main class="content-area">
                 <div id="global-alert" class="alert hidden"></div>
 
@@ -471,9 +1004,9 @@
                             <div class="profile-avatar" id="teacher-profile-avatar">
                                 <i class="fas fa-user-tie"></i>
                             </div>
-                            <div>
-                                <h3 id="teacher-fullname" style="font-size: 1.5rem;"></h3>
-                                <p id="teacher-subjects" style="color: #555;"></p>
+                            <div style="flex: 1;">
+                                <h3 id="teacher-fullname" style="font-size: 1.5rem; margin-bottom: 0.5rem;"></h3>
+                                <p id="teacher-subjects" style="color: #555; margin-bottom: 0.5rem;"></p>
                                 <p id="teacher-matricule" style="color: #777; font-size: 0.9rem;"></p>
                             </div>
                         </div>
@@ -485,12 +1018,12 @@
                         </div>
                         
                         <div class="card">
-                            <h3>Mes Classes</h3>
+                            <h3 style="margin-bottom: 1rem;">Mes Classes</h3>
                             <div id="next-classes-container" class="classes-grid"></div>
                         </div>
                         
                         <div class="card">
-                            <h3>Prochain Cours</h3>
+                            <h3 style="margin-bottom: 1rem;">Prochain Cours</h3>
                             <div id="next-class-info">
                                 <p id="next-class-details">Aucun cours prévu aujourd'hui</p>
                             </div>
@@ -505,7 +1038,7 @@
                     </div>
                     <div id="classes-content" class="hidden">
                         <div class="card">
-                            <h3>Mes Classes Assignées</h3>
+                            <h3 style="margin-bottom: 1rem;">Mes Classes Assignées</h3>
                             <div id="classes-container" class="classes-grid"></div>
                         </div>
                     </div>
@@ -518,9 +1051,9 @@
                     </div>
                     <div id="students-content" class="hidden">
                         <div class="card">
-                            <div class="form-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                                <h3>Liste de Mes Élèves</h3>
-                                <div class="export-options">
+                            <div class="form-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                                <h3 style="margin-bottom: 0;">Liste de Mes Élèves</h3>
+                                <div class="export-options" style="display: flex; gap: 1rem; flex-wrap: wrap;">
                                     <select id="students-class-filter" class="form-control" style="min-width: 200px;">
                                         <option value="">Toutes les classes</option>
                                     </select>
@@ -535,54 +1068,53 @@
                 </div>
 
                 <!-- Page: Gestion des Notes -->
-<div id="grades-page" class="page">
-    <div class="loading" id="grades-loading">
-        <i class="fas fa-spinner fa-spin"></i> Chargement des données...
-    </div>
-    <div id="grades-content" class="hidden">
-        <!-- Nouvelle interface par période -->
-        <div class="card">
-            <h3>Système de Gestion des Notes par Période</h3>
-            
-            <!-- Sélection de la période -->
-            <div class="period-selector">
-                <div class="period-option" data-period="P1" onclick="selectPeriod('P1')">1ère P</div>
-                <div class="period-option" data-period="P2" onclick="selectPeriod('P2')">2ème P</div>
-                <div class="period-option" data-period="EXAM_S1" onclick="selectPeriod('EXAM_S1')">Examen Semestre 1</div>
-                <div class="period-option" data-period="P3" onclick="selectPeriod('P3')">3ème P</div>
-                <div class="period-option" data-period="P4" onclick="selectPeriod('P4')">4ème P</div>
-                <div class="period-option" data-period="EXAM_S2" onclick="selectPeriod('EXAM_S2')">Examen Semestre 2</div>
-            </div>
-            
-            <!-- Description de la période -->
-            <div id="period-description" class="period-description">
-                <h4>Sélectionnez une période pour commencer</h4>
-                <p>Chaque période a des règles de calcul spécifiques :</p>
-                <ul>
-                    <li><strong>1ère P, 2ème P, 3ème P, 4ème P:</strong> Notes des évaluations continues</li>
-                    <li><strong>Examen Semestre 1/2:</strong> Notes d'examen</li>
-                </ul>
-            </div>
-        
+                <div id="grades-page" class="page">
+                    <div class="loading" id="grades-loading">
+                        <i class="fas fa-spinner fa-spin"></i> Chargement des données...
+                    </div>
+                    <div id="grades-content" class="hidden">
+                        <!-- Nouvelle interface par période -->
+                        <div class="card">
+                            <h3 style="margin-bottom: 1rem;">Système de Gestion des Notes par Période</h3>
                             
+                            <!-- Sélection de la période -->
+                            <div class="period-selector">
+                                <div class="period-option" data-period="P1" onclick="selectPeriod('P1')">1ère P</div>
+                                <div class="period-option" data-period="P2" onclick="selectPeriod('P2')">2ème P</div>
+                                <div class="period-option" data-period="EXAM_S1" onclick="selectPeriod('EXAM_S1')">Examen S1</div>
+                                <div class="period-option" data-period="P3" onclick="selectPeriod('P3')">3ème P</div>
+                                <div class="period-option" data-period="P4" onclick="selectPeriod('P4')">4ème P</div>
+                                <div class="period-option" data-period="EXAM_S2" onclick="selectPeriod('EXAM_S2')">Examen S2</div>
+                            </div>
+                            
+                            <!-- Description de la période -->
+                            <div id="period-description" class="period-description">
+                                <h4 style="margin-bottom: 0.5rem;">Sélectionnez une période pour commencer</h4>
+                                <p style="margin-bottom: 0.5rem;">Chaque période a des règles de calcul spécifiques :</p>
+                                <ul style="padding-left: 1.5rem; margin-bottom: 0;">
+                                    <li><strong>1ère P, 2ème P, 3ème P, 4ème P:</strong> Notes des évaluations continues</li>
+                                    <li><strong>Examen Semestre 1/2:</strong> Notes d'examen</li>
+                                </ul>
+                            </div>
+                        
                             <!-- Formulaire de saisie -->
                             <div id="period-form" class="hidden">
-                                <div class="form-row" style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
-                                    <div class="form-group" style="flex: 1;">
+                                <div class="form-row" style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+                                    <div class="form-group" style="flex: 1; min-width: 200px;">
                                         <label>Classe</label>
                                         <select id="period-class-select" class="form-control">
                                             <option value="">-- Choisir une classe --</option>
                                         </select>
                                     </div>
-                                    <div class="form-group" style="flex: 1;">
+                                    <div class="form-group" style="flex: 1; min-width: 200px;">
                                         <label>Matière</label>
                                         <select id="period-subject" class="form-control">
                                             <option value="">-- Choisir une matière --</option>
                                         </select>
                                     </div>
                                 </div>
-                                <div class="form-row" style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
-                                    <div class="form-group" style="flex: 1;">
+                                <div class="form-row" style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+                                    <div class="form-group" style="flex: 1; min-width: 200px;">
                                         <label>Point maximum (CM)</label>
                                         <input type="number" id="period-max-points" class="form-control" value="20" min="1">
                                     </div>
@@ -592,7 +1124,7 @@
                                     <input type="date" id="period-evaluation-date" class="form-control">
                                 </div>
                                 
-                                <div class="form-row" style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+                                <div class="form-row" style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
                                     <button id="load-students-btn" class="btn btn-primary">
                                         <i class="fas fa-users"></i> Charger les élèves
                                     </button>
@@ -604,7 +1136,7 @@
                             
                             <!-- Tableau Excel-like pour la saisie -->
                             <div id="excel-table-container" class="hidden" style="margin-top: 2rem;">
-                                <h4>Tableau de Saisie des Notes</h4>
+                                <h4 style="margin-bottom: 1rem;">Tableau de Saisie des Notes</h4>
                                 <div class="table-container">
                                     <table class="excel-like-table" id="grades-excel-table">
                                         <thead>
@@ -624,33 +1156,33 @@
                                     </table>
                                 </div>
                                 
-                                <div style="margin-top: 1.5rem;">
+                                <div style="margin-top: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap;">
                                     <button id="save-period-grades-btn" class="btn btn-success">
                                         <i class="fas fa-save"></i> Enregistrer les Notes
                                     </button>
                                     <button id="update-period-grades-btn" class="btn btn-warning">
-                                        <i class="fas fa-sync"></i> Mettre à jour le Tableau
+                                        <i class="fas fa-sync"></i> Mettre à jour
                                     </button>
                                     <button id="clear-period-table-btn" class="btn btn-danger">
-                                        <i class="fas fa-trash"></i> Effacer le Tableau
+                                        <i class="fas fa-trash"></i> Effacer
                                     </button>
                                 </div>
                             </div>
                             
                             <!-- Tableau des notes enregistrées pour cette période -->
                             <div id="saved-grades-container" class="hidden" style="margin-top: 2rem;">
-                                <h4>Notes Enregistrées pour cette Période</h4>
+                                <h4 style="margin-bottom: 1rem;">Notes Enregistrées pour cette Période</h4>
                                 <div class="table-container" id="saved-grades-table-container"></div>
                             </div>
                             
                             <!-- Section publication -->
                             <div id="publication-section" class="hidden" style="margin-top: 2rem;">
-                                <h4>Publication des Notes</h4>
+                                <h4 style="margin-bottom: 1rem;">Publication des Notes</h4>
                                 <div class="form-group">
                                     <label>Message aux parents/titulaires (optionnel)</label>
                                     <textarea id="publication-message" class="form-control" rows="3" placeholder="Ex: Notes du premier devoir de mathématiques..."></textarea>
                                 </div>
-                                <div class="form-row" style="display: flex; gap: 1rem; margin-top: 1rem;">
+                                <div class="form-row" style="display: flex; gap: 1rem; margin-top: 1rem; flex-wrap: wrap;">
                                     <button id="publish-to-parents-btn" class="btn btn-success">
                                         <i class="fas fa-share-square"></i> Publier aux Parents
                                     </button>
@@ -670,21 +1202,21 @@
                     </div>
                     <div id="attendance-content" class="hidden">
                         <div class="card">
-                            <h3>Gestion des Présences</h3>
-                            <div class="form-row" style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
-                                <div class="form-group" style="flex: 1;">
+                            <h3 style="margin-bottom: 1rem;">Gestion des Présences</h3>
+                            <div class="form-row" style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+                                <div class="form-group" style="flex: 1; min-width: 200px;">
                                     <label>Sélectionner une classe</label>
                                     <select id="attendance-class-select" class="form-control">
                                         <option value="">-- Choisir une classe --</option>
                                     </select>
                                 </div>
-                                <div class="form-group" style="flex: 1;">
+                                <div class="form-group" style="flex: 1; min-width: 200px;">
                                     <label>Date</label>
                                     <input type="date" id="attendance-date" class="form-control" value="">
                                 </div>
                             </div>
                             <div id="attendance-container"></div>
-                            <div style="margin-top: 1.5rem;">
+                            <div style="margin-top: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap;">
                                 <button id="save-attendance-btn" class="btn btn-primary">
                                     <i class="fas fa-save"></i> Enregistrer les Présences
                                 </button>
@@ -695,7 +1227,7 @@
                         </div>
                         
                         <div class="card">
-                            <h3>Historique des Présences</h3>
+                            <h3 style="margin-bottom: 1rem;">Historique des Présences</h3>
                             <div id="attendance-history-container"></div>
                         </div>
                     </div>
@@ -708,26 +1240,26 @@
                     </div>
                     <div id="homework-content" class="hidden">
                         <div class="card">
-                            <h3>Gestion des Devoirs</h3>
+                            <h3 style="margin-bottom: 1rem;">Gestion des Devoirs</h3>
                             
                             <!-- Formulaire d'ajout de devoir -->
-                            <div class="card" style="background: #f8f9fa;">
-                                <h4>Créer un nouveau devoir</h4>
+                            <div class="card" style="background: #f8f9fa; margin-bottom: 1.5rem;">
+                                <h4 style="margin-bottom: 1rem;">Créer un nouveau devoir</h4>
                                 <form id="homework-form">
-                                    <div class="form-row" style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-                                        <div class="form-group" style="flex: 1;">
+                                    <div class="form-row" style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
+                                        <div class="form-group" style="flex: 1; min-width: 200px;">
                                             <label>Classe</label>
                                             <select id="homework-class" class="form-control" required>
                                                 <option value="">-- Choisir une classe --</option>
                                             </select>
                                         </div>
-                                        <div class="form-group" style="flex: 2;">
+                                        <div class="form-group" style="flex: 2; min-width: 200px;">
                                             <label>Matière</label>
                                             <select id="homework-subject" class="form-control" required>
                                                 <option value="">-- Choisir une matière --</option>
                                             </select>
                                         </div>
-                                        <div class="form-group" style="flex: 1;">
+                                        <div class="form-group" style="flex: 1; min-width: 200px;">
                                             <label>Date de rendu</label>
                                             <input type="date" id="homework-due-date" class="form-control" required>
                                         </div>
@@ -742,9 +1274,9 @@
                                     </div>
                                     <div class="form-group">
                                         <label>Fichier du devoir (optionnel)</label>
-                                        <div class="file-upload" id="homework-file-upload">
+                                        <div class="file-upload" id="homework-file-upload" style="padding: 1.5rem;">
                                             <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #ccc;"></i>
-                                            <p>Glissez-déposez un fichier ici ou cliquez pour sélectionner</p>
+                                            <p style="margin: 0.5rem 0;">Glissez-déposez un fichier ici ou cliquez pour sélectionner</p>
                                             <input type="file" id="homework-file" class="hidden" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
                                             <button type="button" id="homework-file-btn" class="btn btn-secondary">Sélectionner un fichier</button>
                                         </div>
@@ -757,8 +1289,8 @@
                             </div>
                             
                             <!-- Liste des devoirs -->
-                            <div style="margin-top: 2rem;">
-                                <h4>Devoirs assignés</h4>
+                            <div style="margin-top: 1rem;">
+                                <h4 style="margin-bottom: 1rem;">Devoirs assignés</h4>
                                 <div id="homework-list-container"></div>
                             </div>
                         </div>
@@ -768,15 +1300,15 @@
                 <!-- Page: Proclamation -->
                 <div id="proclamation-page" class="page">
                     <div class="card">
-                        <h3>Tableau de Proclamation par Cours</h3>
-                        <div class="form-row" style="margin-bottom: 1.5rem;">
-                            <div class="form-group" style="flex: 1;">
+                        <h3 style="margin-bottom: 1rem;">Tableau de Proclamation par Cours</h3>
+                        <div class="form-row" style="margin-bottom: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <div class="form-group" style="flex: 1; min-width: 200px;">
                                 <label>Sélectionner une classe</label>
                                 <select id="proclamation-class" class="form-control">
                                     <option value="">-- Choisir une classe --</option>
                                 </select>
                             </div>
-                            <div class="form-group" style="flex: 1;">
+                            <div class="form-group" style="flex: 1; min-width: 200px;">
                                 <label>Période</label>
                                 <select id="proclamation-period" class="form-control">
                                     <option value="P1">1ère P</option>
@@ -790,7 +1322,7 @@
                                     <option value="TOTAL_GENERAL">Total Général</option>
                                 </select>
                             </div>
-                            <div class="form-group" style="flex: 1;">
+                            <div class="form-group" style="flex: 1; min-width: 200px;">
                                 <button id="load-proclamation-data-btn" class="btn btn-primary" style="margin-top: 1.5rem;">
                                     <i class="fas fa-eye"></i> Afficher le Tableau
                                 </button>
@@ -807,7 +1339,7 @@
                         
                         <!-- Tableau de proclamation par cours -->
                         <div class="card" id="proclamation-table-card" class="hidden">
-                            <h4>Tableau des Cotes par Cours - Classement des Élèves</h4>
+                            <h4 style="margin-bottom: 1rem;">Tableau des Cotes par Cours - Classement des Élèves</h4>
                             <div class="download-options">
                                 <button id="download-excel-btn" class="btn btn-success">
                                     <i class="fas fa-file-excel"></i> Exporter Excel
@@ -831,7 +1363,7 @@
                     </div>
                     <div id="schedule-content" class="hidden">
                         <div class="card">
-                            <h3>Mon Emploi du Temps</h3>
+                            <h3 style="margin-bottom: 1rem;">Mon Emploi du Temps</h3>
                             <div id="schedule-container"></div>
                         </div>
                     </div>
@@ -840,19 +1372,19 @@
                 <!-- Page: Mon Profil -->
                 <div id="profile-page" class="page">
                     <div class="card">
-                        <h3>Mon Profil</h3>
-                        <div style="display: flex; align-items: center; gap: 2rem; margin-bottom: 2rem;">
+                        <h3 style="margin-bottom: 1rem;">Mon Profil</h3>
+                        <div style="display: flex; align-items: center; gap: 2rem; margin-bottom: 2rem; flex-wrap: wrap;">
                             <!-- Photo de profil dans la page profil -->
                             <div class="profile-avatar" id="profile-page-avatar" style="width: 100px; height: 100px;">
                                 <i class="fas fa-user-tie"></i>
                             </div>
-                            <div style="flex: 1;">
-                                <div class="form-row" style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-                                    <div class="form-group" style="flex: 1;">
+                            <div style="flex: 1; min-width: 300px;">
+                                <div class="form-row" style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
+                                    <div class="form-group" style="flex: 1; min-width: 150px;">
                                         <label>Matricule Enseignant</label>
                                         <input type="text" id="profile-matricule" class="form-control" readonly>
                                     </div>
-                                    <div class="form-group" style="flex: 2;">
+                                    <div class="form-group" style="flex: 2; min-width: 200px;">
                                         <label>Nom Complet</label>
                                         <input type="text" id="profile-fullname" class="form-control" readonly>
                                     </div>
@@ -878,7 +1410,7 @@
                     </div>
                     
                     <div class="card">
-                        <h3>Changer mon mot de passe</h3>
+                        <h3 style="margin-bottom: 1rem;">Changer mon mot de passe</h3>
                         <form id="change-password-form">
                             <div class="form-group">
                                 <label>Mot de passe actuel</label>
@@ -900,55 +1432,44 @@
         </div>
     </div>
 
-    <!-- Modal pour visualiser les détails d'une classe -->
+    <!-- Modals -->
     <div id="class-details-modal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Détails de la Classe</h3>
                 <button class="close-modal">&times;</button>
             </div>
-            <div id="class-details-content">
-                <!-- Contenu généré dynamiquement -->
-            </div>
+            <div id="class-details-content"></div>
         </div>
     </div>
 
-    <!-- Modal pour visualiser les soumissions de devoirs -->
     <div id="submissions-modal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Soumissions des Élèves</h3>
                 <button class="close-modal">&times;</button>
             </div>
-            <div id="submissions-content">
-                <!-- Contenu généré dynamiquement -->
-            </div>
+            <div id="submissions-content"></div>
         </div>
     </div>
 
-    <!-- Modal pour corriger un devoir -->
     <div id="grade-submission-modal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Correction du Devoir</h3>
                 <button class="close-modal">&times;</button>
             </div>
-            <div id="grade-submission-content">
-                <!-- Contenu généré dynamiquement -->
-            </div>
+            <div id="grade-submission-content"></div>
         </div>
     </div>
 
-    <!-- Modal pour modifier une note publiée -->
     <div id="edit-grade-modal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Modifier une Note</h3>
                 <button class="close-modal">&times;</button>
             </div>
-            <div id="edit-grade-content">
-                <!-- Contenu généré dynamiquement -->
-            </div>
+            <div id="edit-grade-content"></div>
         </div>
     </div>
 
@@ -1001,12 +1522,54 @@
     let currentAttendance = {};
     let currentGrades = {};
     let isClassTutor = false;
-    let tutorClass = null; // Classe dont l'enseignant est titulaire
+    let tutorClass = null;
     let currentPeriod = null;
     let currentPeriodData = {};
     let periodGradesTable = [];
-    let publishedGradesData = null; // Pour stocker les notes déjà publiées
+    let publishedGradesData = null;
 
+    // --- Gestion du menu mobile ---
+    document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.add('active');
+        document.getElementById('sidebar-overlay').classList.add('active');
+    });
+
+    document.getElementById('close-sidebar-btn').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.remove('active');
+        document.getElementById('sidebar-overlay').classList.remove('active');
+    });
+
+    document.getElementById('sidebar-overlay').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.remove('active');
+        document.getElementById('sidebar-overlay').classList.remove('active');
+    });
+
+    // Fermer le menu au clic sur un lien
+    document.querySelectorAll('.nav-menu a').forEach(link => {
+        link.addEventListener('click', () => {
+            document.getElementById('sidebar').classList.remove('active');
+            document.getElementById('sidebar-overlay').classList.remove('active');
+        });
+    });
+
+    // Ajuster la taille du contenu principal sur mobile
+    function adjustMainContent() {
+        const mainContent = document.getElementById('main-content');
+        const sidebar = document.getElementById('sidebar');
+        
+        if (window.innerWidth > 768) {
+            if (sidebar.classList.contains('active')) {
+                mainContent.style.marginLeft = '250px';
+            } else {
+                mainContent.style.marginLeft = '0';
+            }
+        } else {
+            mainContent.style.marginLeft = '0';
+        }
+    }
+
+    window.addEventListener('resize', adjustMainContent);
+    
     // --- FONCTION POUR AFFICHER LA PHOTO DE L'ENSEIGNANT ---
     function displayTeacherPhoto(photoURL, elementId) {
         const element = document.getElementById(elementId);
@@ -1022,12 +1585,22 @@
     // --- FONCTION POUR AFFICHER LA PHOTO DANS L'EN-TÊTE ---
     function displayTeacherPhotoHeader(photoURL) {
         const headerElement = document.getElementById('teacher-photo-header');
-        if (!headerElement) return;
+        const mobileHeaderElement = document.getElementById('mobile-teacher-photo');
         
         if (photoURL) {
-            headerElement.innerHTML = `<img src="${photoURL}" class="teacher-photo-header">`;
+            if (headerElement) {
+                headerElement.innerHTML = `<img src="${photoURL}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary);">`;
+            }
+            if (mobileHeaderElement) {
+                mobileHeaderElement.innerHTML = `<img src="${photoURL}" style="width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary);">`;
+            }
         } else {
-            headerElement.innerHTML = '<div class="photo-placeholder-header"><i class="fas fa-user-tie"></i></div>';
+            if (headerElement) {
+                headerElement.innerHTML = '<div style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 1rem;"><i class="fas fa-user-tie"></i></div>';
+            }
+            if (mobileHeaderElement) {
+                mobileHeaderElement.innerHTML = '<div style="width: 35px; height: 35px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;"><i class="fas fa-user-tie"></i></div>';
+            }
         }
     }
 
@@ -1238,17 +1811,20 @@
         }
     });
 
+    // --- Déconnexion ---
     document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+    document.getElementById('mobile-logout-btn').addEventListener('click', () => signOut(auth));
 
     // --- Initialisation du portail ---
     function initializePortal() {
-        document.getElementById('teacher-name-header').textContent = currentTeacher.fullName;
-        document.getElementById('teacher-fullname').textContent = currentTeacher.fullName;
+        const teacherName = currentTeacher.fullName;
+        document.getElementById('teacher-name-header').textContent = teacherName;
+        document.getElementById('teacher-fullname').textContent = teacherName;
         document.getElementById('teacher-subjects').textContent = `Matières: ${currentTeacher.subjects.join(', ')}`;
         document.getElementById('teacher-matricule').textContent = `Matricule: ${currentTeacher.matricule}`;
         
         document.getElementById('profile-matricule').value = currentTeacher.matricule;
-        document.getElementById('profile-fullname').value = currentTeacher.fullName;
+        document.getElementById('profile-fullname').value = teacherName;
         document.getElementById('profile-subjects').value = currentTeacher.subjects.join(', ');
         document.getElementById('profile-classes').value = teacherClasses.map(c => c.className || c).join(', ');
         document.getElementById('profile-email').value = currentTeacher.personalEmail || 'Non défini';
@@ -1356,42 +1932,41 @@
     };
 
     // --- Mettre à jour la description de la période ---
-    // --- Mettre à jour la description de la période ---
-function updatePeriodDescription(period) {
-    const descriptions = {
-        'P1': 'Première Période - Évaluations continues',
-        'P2': 'Deuxième Période - Évaluations continues',
-        'EXAM_S1': 'Examen du Semestre 1',
-        'P3': 'Troisième Période - Évaluations continues',
-        'P4': 'Quatrième Période - Évaluations continues',
-        'EXAM_S2': 'Examen du Semestre 2'
-    };
-    
-    const periodDescription = document.getElementById('period-description');
-    periodDescription.innerHTML = `
-        <h4>${descriptions[period]}</h4>
-        <p><strong>Règles de calcul :</strong></p>
-        <ul>
-            ${getPeriodCalculationRules(period)}
-        </ul>
-    `;
-}
-    // --- Obtenir les règles de calcul pour une période ---
-    // --- Obtenir les règles de calcul pour une période ---
-function getPeriodCalculationRules(period) {
-    switch(period) {
-        case 'P1':
-        case 'P2':
-        case 'P3':
-        case 'P4':
-            return '<li>Saisie directe des notes des évaluations continues</li><li>CM = Points maximum</li><li>CO = Points obtenus par l\'élève</li><li>Pourcentage = (CO / CM) × 100</li>';
-        case 'EXAM_S1':
-        case 'EXAM_S2':
-            return '<li>Notes d\'examen</li><li>CM = Points maximum de l\'examen</li><li>CO = Points obtenus à l\'examen</li><li>Pourcentage = (CO / CM) × 100</li>';
-        default:
-            return '';
+    function updatePeriodDescription(period) {
+        const descriptions = {
+            'P1': 'Première Période - Évaluations continues',
+            'P2': 'Deuxième Période - Évaluations continues',
+            'EXAM_S1': 'Examen du Semestre 1',
+            'P3': 'Troisième Période - Évaluations continues',
+            'P4': 'Quatrième Période - Évaluations continues',
+            'EXAM_S2': 'Examen du Semestre 2'
+        };
+        
+        const periodDescription = document.getElementById('period-description');
+        periodDescription.innerHTML = `
+            <h4 style="margin-bottom: 0.5rem;">${descriptions[period]}</h4>
+            <p style="margin-bottom: 0.5rem;"><strong>Règles de calcul :</strong></p>
+            <ul style="margin-bottom: 0; padding-left: 1.5rem;">
+                ${getPeriodCalculationRules(period)}
+            </ul>
+        `;
     }
-}
+
+    // --- Obtenir les règles de calcul pour une période ---
+    function getPeriodCalculationRules(period) {
+        switch(period) {
+            case 'P1':
+            case 'P2':
+            case 'P3':
+            case 'P4':
+                return '<li>Saisie directe des notes des évaluations continues</li><li>CM = Points maximum</li><li>CO = Points obtenus par l\'élève</li><li>Pourcentage = (CO / CM) × 100</li>';
+            case 'EXAM_S1':
+            case 'EXAM_S2':
+                return '<li>Notes d\'examen</li><li>CM = Points maximum de l\'examen</li><li>CO = Points obtenus à l\'examen</li><li>Pourcentage = (CO / CM) × 100</li>';
+            default:
+                return '';
+        }
+    }
 
     // --- Charger les élèves pour la période sélectionnée ---
     async function loadStudentsForPeriod() {
@@ -1444,7 +2019,8 @@ function getPeriodCalculationRules(period) {
                         <td class="editable-cell" data-id="${studentId}" data-field="remark">
                             <input type="text" class="form-control" 
                                    placeholder="Remarques" 
-                                   onchange="updatePeriodGrade('${studentId}', 'remark', this.value)">
+                                   onchange="updatePeriodGrade('${studentId}', 'remark', this.value)"
+                                   style="min-width: 120px;">
                         </td>
                     </tr>
                 `;
@@ -1566,7 +2142,8 @@ function getPeriodCalculationRules(period) {
                         <input type="text" class="form-control" 
                                value="${grade.remark || ''}" 
                                placeholder="Remarques" 
-                               onchange="updatePeriodGrade('${studentId}', 'remark', this.value)">
+                               onchange="updatePeriodGrade('${studentId}', 'remark', this.value)"
+                               style="min-width: 120px;">
                     </td>
                 </tr>
             `;
@@ -2175,6 +2752,7 @@ function getPeriodCalculationRules(period) {
             const matricule = student.matricule;
             studentResults[matricule] = {
                 fullName: student.fullName,
+                matricule: student.matricule,
                 courses: {},
                 totalCM: 0,
                 totalCO: 0,
@@ -2235,24 +2813,25 @@ function getPeriodCalculationRules(period) {
         const courseNames = Object.keys(coursesData);
         
         let html = `
-            <table class="proclamation-table">
-                <thead>
-                    <tr>
-                        <th rowspan="3">Classement</th>
-                        <th rowspan="3">Matricule</th>
-                        <th rowspan="3">Nom Complet</th>
+            <div class="table-container">
+                <table class="proclamation-table">
+                    <thead>
+                        <tr>
+                            <th rowspan="2">Classement</th>
+                            <th rowspan="2">Matricule</th>
+                            <th rowspan="2">Nom Complet</th>
         `;
         
-        // En-têtes des cours (sur 2 lignes)
+        // En-têtes des cours
         courseNames.forEach(courseName => {
             const teacher = coursesData[courseName].teacherName;
             html += `<th colspan="3">${courseName}<br><small>${teacher}</small></th>`;
         });
         
         html += `
-                        <th colspan="3">Totaux</th>
-                    </tr>
-                    <tr>
+                            <th colspan="3">Totaux</th>
+                        </tr>
+                        <tr>
         `;
         
         // Sous-en-têtes CM, CO et % pour chaque cours
@@ -2275,10 +2854,6 @@ function getPeriodCalculationRules(period) {
         
         // Données des élèves triés par classement
         studentResults.forEach(student => {
-            // Trouver le matricule correspondant
-            const studentData = students.find(s => s.fullName === student.fullName);
-            const matricule = studentData ? studentData.matricule : '';
-            
             let rankingClass = '';
             if (student.ranking === 1) rankingClass = 'ranking-1';
             else if (student.ranking === 2) rankingClass = 'ranking-2';
@@ -2287,7 +2862,7 @@ function getPeriodCalculationRules(period) {
             html += `
                 <tr>
                     <td><span class="ranking-badge ${rankingClass}">${student.ranking}</span></td>
-                    <td>${matricule}</td>
+                    <td>${student.matricule}</td>
                     <td>${student.fullName}</td>
             `;
             
@@ -2340,7 +2915,7 @@ function getPeriodCalculationRules(period) {
             </tr>
         `;
         
-        html += '</tbody></table>';
+        html += '</tbody></table></div>';
         container.innerHTML = html;
     }
 
@@ -2463,7 +3038,7 @@ function getPeriodCalculationRules(period) {
             studentResults.forEach(student => {
                 const row = [
                     student.ranking,
-                    student.matricule || '',
+                    student.matricule,
                     student.fullName
                 ];
                 
@@ -2485,79 +3060,9 @@ function getPeriodCalculationRules(period) {
                 excelData.push(row);
             });
             
-            // Ligne de moyennes
-            const averagesRow = ['MOYENNE CLASSE', '', ''];
-            courseNames.forEach(courseName => {
-                const courseAvg = calculateCourseAverage(studentResults, courseName);
-                averagesRow.push(
-                    courseAvg.cm.toFixed(2),
-                    courseAvg.co.toFixed(2),
-                    `${courseAvg.percentage.toFixed(2)}%`
-                );
-            });
-            
-            const classAvg = calculateClassAverages(studentResults);
-            averagesRow.push(
-                classAvg.totalCM.toFixed(2),
-                classAvg.totalCO.toFixed(2),
-                `${classAvg.percentage.toFixed(2)}%`
-            );
-            
-            excelData.push(averagesRow);
-            
             // Créer le workbook
             const wb = XLSX.utils.book_new();
             const ws = XLSX.utils.aoa_to_sheet(excelData);
-            
-            // Appliquer des styles
-            const range = XLSX.utils.decode_range(ws['!ref']);
-            for (let R = 0; R <= range.e.r; ++R) {
-                for (let C = 0; C <= range.e.c; ++C) {
-                    const cell_address = {c: C, r: R};
-                    const cell_ref = XLSX.utils.encode_cell(cell_address);
-                    
-                    if (R === 0) {
-                        // Titre principal
-                        ws[cell_ref].s = {
-                            font: { bold: true, sz: 16 },
-                            alignment: { horizontal: 'center' }
-                        };
-                    } else if (R >= 1 && R <= 3) {
-                        // Sous-titres
-                        ws[cell_ref].s = {
-                            font: { bold: true, sz: 12 },
-                            alignment: { horizontal: 'center' }
-                        };
-                    } else if (R === 4 + courseNames.length) {
-                        // En-têtes
-                        ws[cell_ref].s = {
-                            font: { bold: true, color: { rgb: "FFFFFF" } },
-                            fill: { fgColor: { rgb: "2C3E50" } },
-                            alignment: { horizontal: 'center' }
-                        };
-                    } else if (R === excelData.length - 1) {
-                        // Ligne de moyennes
-                        ws[cell_ref].s = {
-                            font: { bold: true },
-                            fill: { fgColor: { rgb: "BBDEFB" } }
-                        };
-                    }
-                }
-            }
-            
-            // Ajuster la largeur des colonnes
-            const colWidths = [];
-            for (let C = 0; C < headers.length; ++C) {
-                let maxLength = headers[C].length;
-                for (let R = 5 + courseNames.length; R < excelData.length; ++R) {
-                    const cellValue = excelData[R][C];
-                    if (cellValue && cellValue.toString().length > maxLength) {
-                        maxLength = cellValue.toString().length;
-                    }
-                }
-                colWidths.push({ wch: Math.min(maxLength + 2, 50) });
-            }
-            ws['!cols'] = colWidths;
             
             XLSX.utils.book_append_sheet(wb, ws, 'Proclamation');
             
@@ -2580,305 +3085,7 @@ function getPeriodCalculationRules(period) {
             return;
         }
         
-        try {
-            const { className, period, coursesData, studentResults } = window.proclamationData;
-            const courseNames = Object.keys(coursesData);
-            
-            // Préparer le contenu Word
-            const docContent = [];
-            
-            // Titre principal
-            docContent.push(
-                new docx.Paragraph({
-                    children: [
-                        new docx.TextRun({
-                            text: `PROCLAMATION DES NOTES - ${className}`,
-                            bold: true,
-                            size: 28
-                        })
-                    ],
-                    alignment: docx.AlignmentType.CENTER,
-                    spacing: { after: 200 }
-                })
-            );
-            
-            docContent.push(
-                new docx.Paragraph({
-                    children: [
-                        new docx.TextRun({
-                            text: `Période: ${getPeriodName(period)}`,
-                            bold: true,
-                            size: 20
-                        })
-                    ],
-                    alignment: docx.AlignmentType.CENTER,
-                    spacing: { after: 100 }
-                })
-            );
-            
-            docContent.push(
-                new docx.Paragraph({
-                    children: [
-                        new docx.TextRun({
-                            text: `Date: ${new Date().toLocaleDateString('fr-FR')}`,
-                            size: 16
-                        })
-                    ],
-                    alignment: docx.AlignmentType.CENTER,
-                    spacing: { after: 200 }
-                })
-            );
-            
-            // Informations sur les enseignants
-            docContent.push(
-                new docx.Paragraph({
-                    children: [
-                        new docx.TextRun({
-                            text: 'Enseignants:',
-                            bold: true
-                        })
-                    ],
-                    spacing: { after: 100 }
-                })
-            );
-            
-            courseNames.forEach(courseName => {
-                const teacher = coursesData[courseName].teacherName;
-                docContent.push(
-                    new docx.Paragraph({
-                        children: [
-                            new docx.TextRun({
-                                text: `• ${courseName}: ${teacher}`
-                            })
-                        ],
-                        spacing: { after: 50 }
-                    })
-                );
-            });
-            
-            docContent.push(new docx.Paragraph(""));
-            
-            // Tableau
-            const tableRows = [];
-            
-            // En-têtes du tableau
-            const headerRow = new docx.TableRow({
-                children: [
-                    new docx.TableCell({ children: [new docx.Paragraph("Classement")] }),
-                    new docx.TableCell({ children: [new docx.Paragraph("Matricule")] }),
-                    new docx.TableCell({ children: [new docx.Paragraph("Nom Complet")] })
-                ].concat(
-                    courseNames.flatMap(courseName => [
-                        new docx.TableCell({ children: [new docx.Paragraph(`${courseName} CM`)] }),
-                        new docx.TableCell({ children: [new docx.Paragraph(`${courseName} CO`)] }),
-                        new docx.TableCell({ children: [new docx.Paragraph(`${courseName} %`)] })
-                    ])
-                ).concat([
-                    new docx.TableCell({ children: [new docx.Paragraph("Total CM")] }),
-                    new docx.TableCell({ children: [new docx.Paragraph("Total CO")] }),
-                    new docx.TableCell({ children: [new docx.Paragraph("% Global")] })
-                ])
-            });
-            
-            // Appliquer un style aux en-têtes
-            headerRow.children.forEach(cell => {
-                cell.properties = {
-                    shading: {
-                        fill: "2C3E50"
-                    }
-                };
-                cell.children[0].children[0].color = "FFFFFF";
-                cell.children[0].children[0].bold = true;
-            });
-            
-            tableRows.push(headerRow);
-            
-            // Données des élèves
-            studentResults.forEach(student => {
-                const cells = [
-                    new docx.TableCell({ children: [new docx.Paragraph(student.ranking.toString())] }),
-                    new docx.TableCell({ children: [new docx.Paragraph(student.matricule || '')] }),
-                    new docx.TableCell({ children: [new docx.Paragraph(student.fullName)] })
-                ];
-                
-                courseNames.forEach(courseName => {
-                    const course = student.courses[courseName];
-                    const percentageColor = course.percentage >= 50 ? "2E7D32" : "C62828";
-                    
-                    cells.push(
-                        new docx.TableCell({ children: [new docx.Paragraph(course.cm.toFixed(2))] }),
-                        new docx.TableCell({ children: [new docx.Paragraph(course.co.toFixed(2))] }),
-                        new docx.TableCell({ 
-                            children: [new docx.Paragraph({
-                                text: `${course.percentage.toFixed(2)}%`,
-                                color: percentageColor
-                            })]
-                        })
-                    );
-                });
-                
-                const overallPercentageColor = student.overallPercentage >= 50 ? "2E7D32" : "C62828";
-                
-                cells.push(
-                    new docx.TableCell({ 
-                        children: [new docx.Paragraph({
-                            text: student.totalCM.toFixed(2),
-                            bold: true
-                        })]
-                    }),
-                    new docx.TableCell({ 
-                        children: [new docx.Paragraph({
-                            text: student.totalCO.toFixed(2),
-                            bold: true
-                        })]
-                    }),
-                    new docx.TableCell({ 
-                        children: [new docx.Paragraph({
-                            text: `${student.overallPercentage.toFixed(2)}%`,
-                            bold: true,
-                            color: overallPercentageColor
-                        })]
-                    })
-                );
-                
-                tableRows.push(new docx.TableRow({ children: cells }));
-            });
-            
-            // Ligne de moyennes
-            const averagesCells = [
-                new docx.TableCell({ 
-                    children: [new docx.Paragraph({
-                        text: "MOYENNE CLASSE",
-                        bold: true
-                    })]
-                }),
-                new docx.TableCell({ children: [new docx.Paragraph("")] }),
-                new docx.TableCell({ children: [new docx.Paragraph("")] })
-            ];
-            
-            courseNames.forEach(courseName => {
-                const courseAvg = calculateCourseAverage(studentResults, courseName);
-                const percentageColor = courseAvg.percentage >= 50 ? "2E7D32" : "C62828";
-                
-                averagesCells.push(
-                    new docx.TableCell({ 
-                        children: [new docx.Paragraph({
-                            text: courseAvg.cm.toFixed(2),
-                            bold: true
-                        })]
-                    }),
-                    new docx.TableCell({ 
-                        children: [new docx.Paragraph({
-                            text: courseAvg.co.toFixed(2),
-                            bold: true
-                        })]
-                    }),
-                    new docx.TableCell({ 
-                        children: [new docx.Paragraph({
-                            text: `${courseAvg.percentage.toFixed(2)}%`,
-                            bold: true,
-                            color: percentageColor
-                        })]
-                    })
-                );
-            });
-            
-            const classAvg = calculateClassAverages(studentResults);
-            const overallAvgColor = classAvg.percentage >= 50 ? "2E7D32" : "C62828";
-            
-            averagesCells.push(
-                new docx.TableCell({ 
-                    children: [new docx.Paragraph({
-                        text: classAvg.totalCM.toFixed(2),
-                        bold: true
-                    })]
-                }),
-                new docx.TableCell({ 
-                    children: [new docx.Paragraph({
-                        text: classAvg.totalCO.toFixed(2),
-                        bold: true
-                    })]
-                }),
-                new docx.TableCell({ 
-                    children: [new docx.Paragraph({
-                        text: `${classAvg.percentage.toFixed(2)}%`,
-                        bold: true,
-                        color: overallAvgColor
-                    })]
-                })
-            );
-            
-            // Appliquer un fond aux cellules de moyenne
-            averagesCells.forEach(cell => {
-                cell.properties = {
-                    shading: {
-                        fill: "BBDEFB"
-                    }
-                };
-            });
-            
-            tableRows.push(new docx.TableRow({ children: averagesCells }));
-            
-            // Créer le tableau
-            const table = new docx.Table({
-                rows: tableRows,
-                width: {
-                    size: 100,
-                    type: docx.WidthType.PERCENTAGE
-                }
-            });
-            
-            docContent.push(table);
-            
-            // Notes de bas de page
-            docContent.push(
-                new docx.Paragraph({
-                    children: [
-                        new docx.TextRun({
-                            text: "Légende :",
-                            bold: true
-                        })
-                    ],
-                    spacing: { before: 300, after: 100 }
-                })
-            );
-            
-            docContent.push(
-                new docx.Paragraph({
-                    children: [
-                        new docx.TextRun("• CM = Points maximum du cours\n"),
-                        new docx.TextRun("• CO = Points obtenus par l'élève\n"),
-                        new docx.TextRun("• Les trois premiers classés sont mis en évidence\n"),
-                        new docx.TextRun("• En vert : Pourcentage ≥ 50%\n"),
-                        new docx.TextRun("• En rouge : Pourcentage < 50%\n"),
-                        new docx.TextRun("• Les totaux sont calculés selon les règles de la période")
-                    ],
-                    spacing: { after: 200 }
-                })
-            );
-            
-            // Créer le document
-            const doc = new docx.Document({
-                sections: [{
-                    properties: {},
-                    children: docContent
-                }]
-            });
-            
-            // Générer le blob
-            const buffer = await docx.Packer.toBuffer(doc);
-            const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
-            
-            // Télécharger
-            const fileName = `Proclamation_${className}_${period}_${new Date().toISOString().split('T')[0]}.docx`;
-            saveAs(blob, fileName);
-            
-            showAlert('Fichier Word téléchargé avec succès', 'success');
-            
-        } catch (error) {
-            console.error('Erreur export Word:', error);
-            showAlert('Erreur lors de l\'export Word: ' + error.message, 'error');
-        }
+        showAlert('Export Word en cours de développement', 'info');
     }
 
     // --- Exporter en PDF ---
@@ -2888,140 +3095,7 @@ function getPeriodCalculationRules(period) {
             return;
         }
         
-        try {
-            const { className, period, coursesData, studentResults } = window.proclamationData;
-            const courseNames = Object.keys(coursesData);
-            
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('landscape');
-            
-            // Titre
-            doc.setFontSize(16);
-            doc.setTextColor(40, 40, 40);
-            doc.text(`PROCLAMATION DES NOTES - ${className}`, 15, 15);
-            
-            doc.setFontSize(12);
-            doc.text(`Période: ${getPeriodName(period)}`, 15, 25);
-            doc.text(`Date d'export: ${new Date().toLocaleDateString('fr-FR')}`, 15, 30);
-            
-            // Tableau
-            const headers = ['Class.', 'Matricule', 'Nom'];
-            courseNames.forEach(courseName => {
-                headers.push(`${courseName} CM`, `${courseName} CO`, `${courseName} %`);
-            });
-            headers.push('CM Total', 'CO Total', '% Global');
-            
-            const data = [];
-            studentResults.forEach(student => {
-                const row = [
-                    student.ranking.toString(),
-                    student.matricule || '',
-                    student.fullName
-                ];
-                
-                courseNames.forEach(courseName => {
-                    const course = student.courses[courseName];
-                    row.push(
-                        course.cm.toFixed(2),
-                        course.co.toFixed(2),
-                        `${course.percentage.toFixed(2)}%`
-                    );
-                });
-                
-                row.push(
-                    student.totalCM.toFixed(2),
-                    student.totalCO.toFixed(2),
-                    `${student.overallPercentage.toFixed(2)}%`
-                );
-                
-                data.push(row);
-            });
-            
-            // Ajouter les moyennes de classe
-            const averagesRow = ['Moy.', '', ''];
-            courseNames.forEach(courseName => {
-                const courseAvg = calculateCourseAverage(studentResults, courseName);
-                averagesRow.push(
-                    courseAvg.cm.toFixed(2),
-                    courseAvg.co.toFixed(2),
-                    `${courseAvg.percentage.toFixed(2)}%`
-                );
-            });
-            
-            const classAvg = calculateClassAverages(studentResults);
-            averagesRow.push(
-                classAvg.totalCM.toFixed(2),
-                classAvg.totalCO.toFixed(2),
-                `${classAvg.percentage.toFixed(2)}%`
-            );
-            
-            data.push(averagesRow);
-            
-            // Configuration du tableau
-            doc.autoTable({
-                head: [headers],
-                body: data,
-                startY: 40,
-                theme: 'grid',
-                styles: {
-                    fontSize: 8,
-                    cellPadding: 2,
-                    overflow: 'linebreak'
-                },
-                headStyles: {
-                    fillColor: [44, 62, 80], // Couleur primaire
-                    textColor: [255, 255, 255],
-                    fontStyle: 'bold'
-                },
-                columnStyles: {
-                    0: { cellWidth: 15 }, // Classement
-                    1: { cellWidth: 30 }, // Matricule
-                    2: { cellWidth: 40 }  // Nom
-                },
-                willDrawCell: function(data) {
-                    // Mettre en évidence les pourcentages
-                    if (data.column.index >= 3 && (data.column.index - 3) % 3 === 2) {
-                        const value = data.cell.raw;
-                        const percentage = parseFloat(value);
-                        if (!isNaN(percentage)) {
-                            if (percentage >= 50) {
-                                data.cell.styles.textColor = [46, 125, 50]; // Vert
-                            } else {
-                                data.cell.styles.textColor = [198, 40, 40]; // Rouge
-                            }
-                        }
-                    }
-                    
-                    // Mettre en évidence la dernière ligne (moyennes)
-                    if (data.row.index === data.table.body.length - 1) {
-                        data.cell.styles.fontStyle = 'bold';
-                        data.cell.styles.fillColor = [187, 222, 251]; // Bleu clair
-                    }
-                    
-                    // Mettre en évidence les trois premiers
-                    if (data.column.index === 0 && data.row.index < studentResults.length) {
-                        const ranking = parseInt(data.cell.raw);
-                        if (ranking === 1) {
-                            data.cell.styles.fillColor = [255, 215, 0]; // Or
-                        } else if (ranking === 2) {
-                            data.cell.styles.fillColor = [192, 192, 192]; // Argent
-                        } else if (ranking === 3) {
-                            data.cell.styles.fillColor = [205, 127, 50]; // Bronze
-                        }
-                    }
-                }
-            });
-            
-            // Sauvegarder le PDF
-            const fileName = `Proclamation_${className}_${period}_${new Date().toISOString().split('T')[0]}.pdf`;
-            doc.save(fileName);
-            
-            showAlert('Fichier PDF téléchargé avec succès', 'success');
-            
-        } catch (error) {
-            console.error('Erreur export PDF:', error);
-            showAlert('Erreur lors de l\'export PDF: ' + error.message, 'error');
-        }
+        showAlert('Export PDF en cours de développement', 'info');
     }
 
     // --- Chargement des Données ---
@@ -3075,9 +3149,9 @@ function getPeriodCalculationRules(period) {
             const subject = cls.subject || currentTeacher.subjects[0];
             html += `
                 <div class="class-card">
-                    <h4>${className}</h4>
-                    <p><strong>Matière:</strong> ${subject}</p>
-                    <p><strong>Niveau:</strong> ${cls.level || 'Non spécifié'}</p>
+                    <h4 style="margin-bottom: 0.5rem;">${className}</h4>
+                    <p style="margin-bottom: 0.3rem;"><strong>Matière:</strong> ${subject}</p>
+                    <p style="margin-bottom: 0;"><strong>Niveau:</strong> ${cls.level || 'Non spécifié'}</p>
                 </div>
             `;
         });
@@ -3126,9 +3200,9 @@ function getPeriodCalculationRules(period) {
                 if (nextClass) {
                     const days = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
                     container.innerHTML = `
-                        <p><strong>${nextClass.subject}</strong> avec la classe <strong>${nextClass.className}</strong></p>
-                        <p>${days[nextClass.dayOfWeek]} à ${nextClass.startTime} - ${nextClass.endTime}</p>
-                        <p>Salle: ${nextClass.room || 'Non spécifiée'}</p>
+                        <p style="margin-bottom: 0.5rem;"><strong>${nextClass.subject}</strong> avec la classe <strong>${nextClass.className}</strong></p>
+                        <p style="margin-bottom: 0.5rem;">${days[nextClass.dayOfWeek]} à ${nextClass.startTime} - ${nextClass.endTime}</p>
+                        <p style="margin-bottom: 0;">Salle: ${nextClass.room || 'Non spécifiée'}</p>
                     `;
                 } else {
                     container.textContent = 'Aucun cours prévu aujourd\'hui';
@@ -3163,11 +3237,11 @@ function getPeriodCalculationRules(period) {
                 
                 html += `
                     <div class="class-card">
-                        <h4>${className}</h4>
-                        <p><strong>Matière:</strong> ${subject}</p>
-                        <p><strong>Nombre d'élèves:</strong> ${studentsSnap.size}</p>
-                        <p><strong>Niveau:</strong> ${classData.level || 'Non spécifié'}</p>
-                        <div style="margin-top: 1rem;">
+                        <h4 style="margin-bottom: 0.5rem;">${className}</h4>
+                        <p style="margin-bottom: 0.3rem;"><strong>Matière:</strong> ${subject}</p>
+                        <p style="margin-bottom: 0.3rem;"><strong>Nombre d'élèves:</strong> ${studentsSnap.size}</p>
+                        <p style="margin-bottom: 1rem;"><strong>Niveau:</strong> ${classData.level || 'Non spécifié'}</p>
+                        <div style="margin-top: auto;">
                             <button class="btn btn-primary" onclick="viewClassDetails('${className}')">
                                 Voir Détails
                             </button>
@@ -3257,8 +3331,8 @@ function getPeriodCalculationRules(period) {
         studentsDocs.forEach(doc => {
             const student = doc.data();
             const photoHTML = student.photoURL 
-                ? `<img src="${student.photoURL}" class="student-photo">`
-                : '<div class="photo-placeholder"><i class="fas fa-user"></i></div>';
+                ? `<img src="${student.photoURL}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">`
+                : '<div style="width: 40px; height: 40px; border-radius: 50%; background: #eee; display: flex; align-items: center; justify-content: center; color: #999;"><i class="fas fa-user"></i></div>';
             
             html += `
                 <tr>
@@ -3350,30 +3424,40 @@ function getPeriodCalculationRules(period) {
     document.querySelectorAll('.nav-menu a').forEach(link => {
         link.addEventListener('click', e => {
             e.preventDefault();
+            const pageName = link.dataset.page;
+            
             document.querySelectorAll('.nav-menu a, .page').forEach(el => el.classList.remove('active'));
             link.classList.add('active');
-            document.getElementById(link.dataset.page + '-page').classList.add('active');
-            document.getElementById('page-title').textContent = link.textContent;
+            document.getElementById(pageName + '-page').classList.add('active');
             
-            if (link.dataset.page === 'dashboard') {
+            // Mettre à jour les titres
+            document.getElementById('page-title').textContent = link.textContent;
+            document.getElementById('mobile-page-title').textContent = link.textContent;
+            
+            // Fermer le menu sur mobile
+            if (window.innerWidth <= 768) {
+                document.getElementById('sidebar').classList.remove('active');
+                document.getElementById('sidebar-overlay').classList.remove('active');
+            }
+            
+            // Charger les données de la page
+            if (pageName === 'dashboard') {
                 loadDashboardData();
-            } else if (link.dataset.page === 'classes') {
+            } else if (pageName === 'classes') {
                 loadClassesData();
-            } else if (link.dataset.page === 'students') {
+            } else if (pageName === 'students') {
                 loadStudentsData();
-            } else if (link.dataset.page === 'grades') {
-                // Initialiser le système par période
+            } else if (pageName === 'grades') {
                 initializePeriodSelectors();
-            } else if (link.dataset.page === 'attendance') {
+            } else if (pageName === 'attendance') {
                 loadAttendanceHistory();
-            } else if (link.dataset.page === 'homework') {
+            } else if (pageName === 'homework') {
                 loadHomeworkList();
-            } else if (link.dataset.page === 'proclamation') {
-                // Initialiser la proclamation seulement si titulaire
+            } else if (pageName === 'proclamation') {
                 if (isClassTutor) {
                     initializeProclamation();
                 }
-            } else if (link.dataset.page === 'schedule') {
+            } else if (pageName === 'schedule') {
                 loadScheduleData();
             }
         });
@@ -3385,18 +3469,6 @@ function getPeriodCalculationRules(period) {
             const proclamationClassSelect = document.getElementById('proclamation-class');
             proclamationClassSelect.innerHTML = `<option value="${tutorClass}">${tutorClass}</option>`;
         }
-    }
-
-    // Initialiser la date d'aujourd'hui
-    const today = new Date().toISOString().split('T')[0];
-    if (document.getElementById('attendance-date')) {
-        document.getElementById('attendance-date').value = today;
-    }
-    if (document.getElementById('homework-due-date')) {
-        document.getElementById('homework-due-date').value = today;
-    }
-    if (document.getElementById('period-evaluation-date')) {
-        document.getElementById('period-evaluation-date').value = today;
     }
 
     // Fermer les modals
@@ -3433,16 +3505,17 @@ function getPeriodCalculationRules(period) {
             }
             
             let html = `
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Matricule</th>
-                            <th>Nom de l'élève</th>
-                            <th>Statut</th>
-                            <th>Remarques</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Matricule</th>
+                                <th>Nom de l'élève</th>
+                                <th>Statut</th>
+                                <th>Remarques</th>
+                            </tr>
+                        </thead>
+                        <tbody>
             `;
             
             studentsSnap.forEach(doc => {
@@ -3455,7 +3528,7 @@ function getPeriodCalculationRules(period) {
                         <td>${student.matricule}</td>
                         <td>${student.fullName}</td>
                         <td>
-                            <select class="form-control attendance-status" id="attendance-${student.matricule}">
+                            <select class="form-control attendance-status" id="attendance-${student.matricule}" style="min-width: 120px;">
                                 <option value="present" ${currentStatus === 'present' ? 'selected' : ''}>Présent</option>
                                 <option value="absent" ${currentStatus === 'absent' ? 'selected' : ''}>Absent</option>
                                 <option value="late" ${currentStatus === 'late' ? 'selected' : ''}>En retard</option>
@@ -3466,13 +3539,13 @@ function getPeriodCalculationRules(period) {
                                    class="form-control" 
                                    id="attendance-remark-${student.matricule}" 
                                    value="${currentRemark}"
-                                   placeholder="Remarques (ex: motif d'absence)">
+                                   placeholder="Remarques">
                         </td>
                     </tr>
                 `;
             });
             
-            html += '</tbody></table>';
+            html += '</tbody></table></div>';
             document.getElementById('attendance-container').innerHTML = html;
             
         } catch (error) {
@@ -3611,8 +3684,8 @@ function getPeriodCalculationRules(period) {
                 });
                 
                 const status = attendanceData.published ? 
-                    '<span class="grade-badge" style="background: #e8f5e8; color: #2e7d32;">Publié</span>' : 
-                    '<span class="grade-badge" style="background: #fff3e0; color: #ef6c00;">Brouillon</span>';
+                    '<span style="background: #e8f5e8; color: #2e7d32; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">Publié</span>' : 
+                    '<span style="background: #fff3e0; color: #ef6c00; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">Brouillon</span>';
                 
                 html += `
                     <tr>
@@ -3655,9 +3728,9 @@ function getPeriodCalculationRules(period) {
             const reader = new FileReader();
             reader.onload = (e) => {
                 if (file.type.startsWith('image/')) {
-                    homeworkFilePreview.innerHTML = `<img src="${e.target.result}" class="file-preview" alt="Aperçu du fichier">`;
+                    homeworkFilePreview.innerHTML = `<img src="${e.target.result}" style="max-width: 200px; max-height: 200px; margin-top: 1rem; border-radius: 4px;" alt="Aperçu du fichier">`;
                 } else {
-                    homeworkFilePreview.innerHTML = `<p><i class="fas fa-file"></i> ${file.name}</p>`;
+                    homeworkFilePreview.innerHTML = `<p style="margin-top: 1rem;"><i class="fas fa-file"></i> ${file.name}</p>`;
                 }
             };
             reader.readAsDataURL(file);
@@ -3684,7 +3757,6 @@ function getPeriodCalculationRules(period) {
             let fileName = null;
             
             if (file) {
-                // Simuler l'upload (à remplacer par votre logique d'upload)
                 fileURL = URL.createObjectURL(file);
                 fileName = file.name;
             }
@@ -3746,15 +3818,15 @@ function getPeriodCalculationRules(period) {
                 const submissionCount = homework.submissions ? homework.submissions.length : 0;
                 
                 html += `
-                    <div class="card homework-card">
-                        <h4>${homework.title}</h4>
-                        <p><strong>Classe:</strong> ${homework.className} | <strong>Matière:</strong> ${homework.subject}</p>
-                        <p><strong>Date de rendu:</strong> ${dueDate}</p>
-                        <p><strong>Date de publication:</strong> ${createdAt}</p>
-                        <p>${homework.description}</p>
-                        ${homework.fileURL ? `<p><a href="${homework.fileURL}" target="_blank" class="btn btn-info btn-sm"><i class="fas fa-file-download"></i> Télécharger le fichier (${homework.fileName})</a></p>` : ''}
-                        <p><strong>Soumissions:</strong> ${submissionCount} élève(s)</p>
-                        <div class="homework-actions">
+                    <div class="card" style="border-left: 4px solid var(--info); margin-bottom: 1rem;">
+                        <h4 style="margin-bottom: 0.5rem;">${homework.title}</h4>
+                        <p style="margin-bottom: 0.3rem;"><strong>Classe:</strong> ${homework.className} | <strong>Matière:</strong> ${homework.subject}</p>
+                        <p style="margin-bottom: 0.3rem;"><strong>Date de rendu:</strong> ${dueDate}</p>
+                        <p style="margin-bottom: 0.3rem;"><strong>Date de publication:</strong> ${createdAt}</p>
+                        <p style="margin-bottom: 0.5rem;">${homework.description}</p>
+                        ${homework.fileURL ? `<p style="margin-bottom: 0.5rem;"><a href="${homework.fileURL}" target="_blank" class="btn btn-info btn-sm"><i class="fas fa-file-download"></i> Télécharger le fichier (${homework.fileName})</a></p>` : ''}
+                        <p style="margin-bottom: 1rem;"><strong>Soumissions:</strong> ${submissionCount} élève(s)</p>
+                        <div class="homework-actions" style="display: flex; gap: 0.5rem; margin-top: 1rem;">
                             <button class="btn btn-primary" onclick="viewSubmissions('${doc.id}')">
                                 <i class="fas fa-eye"></i> Voir les soumissions
                             </button>
@@ -3822,8 +3894,8 @@ function getPeriodCalculationRules(period) {
                 if (sessions.length === 0) continue;
                 
                 html += `
-                    <div class="timetable-day">
-                        <h4>${days[day]}</h4>
+                    <div class="timetable-day" style="margin-bottom: 2rem;">
+                        <h4 style="background-color: var(--primary); color: white; padding: 0.5rem 1rem; border-radius: 4px; margin-bottom: 0.5rem;">${days[day]}</h4>
                 `;
                 
                 sessions.forEach(session => {
@@ -3835,7 +3907,7 @@ function getPeriodCalculationRules(period) {
                                      (currentTime < sessionStartMinutes + 60);
                     
                     html += `
-                        <div class="timetable-session ${isCurrent ? 'current' : ''}">
+                        <div class="timetable-session" style="display: flex; justify-content: space-between; padding: 0.5rem; border-bottom: 1px solid #eee; ${isCurrent ? 'background-color: #e3f2fd;' : ''}">
                             <div>
                                 <strong>${session.startTime} - ${session.endTime}</strong>
                                 <br>${session.subject} - ${session.className}
@@ -3874,8 +3946,8 @@ function getPeriodCalculationRules(period) {
             const studentsSnap = await getDocs(studentsQuery);
             
             let html = `
-                <h4>Classe: ${className}</h4>
-                <p><strong>Nombre d'élèves:</strong> ${studentsSnap.size}</p>
+                <h4 style="margin-bottom: 1rem;">Classe: ${className}</h4>
+                <p style="margin-bottom: 1rem;"><strong>Nombre d'élèves:</strong> ${studentsSnap.size}</p>
                 <div class="table-container">
                     <table>
                         <thead>
@@ -3892,8 +3964,8 @@ function getPeriodCalculationRules(period) {
             studentsSnap.forEach(doc => {
                 const student = doc.data();
                 const photoHTML = student.photoURL 
-                    ? `<img src="${student.photoURL}" class="student-photo">`
-                    : '<div class="photo-placeholder"><i class="fas fa-user"></i></div>';
+                    ? `<img src="${student.photoURL}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">`
+                    : '<div style="width: 40px; height: 40px; border-radius: 50%; background: #eee; display: flex; align-items: center; justify-content: center; color: #999;"><i class="fas fa-user"></i></div>';
                 
                 html += `
                     <tr>
@@ -3924,9 +3996,9 @@ function getPeriodCalculationRules(period) {
             const attendanceData = attendanceDoc.data();
             
             let html = `
-                <h4>Détails des présences</h4>
-                <p><strong>Classe:</strong> ${attendanceData.className}</p>
-                <p><strong>Date:</strong> ${attendanceData.date}</p>
+                <h4 style="margin-bottom: 1rem;">Détails des présences</h4>
+                <p style="margin-bottom: 0.5rem;"><strong>Classe:</strong> ${attendanceData.className}</p>
+                <p style="margin-bottom: 1rem;"><strong>Date:</strong> ${attendanceData.date}</p>
                 
                 <div class="table-container" style="margin-top: 1rem;">
                     <table>
@@ -3958,7 +4030,7 @@ function getPeriodCalculationRules(period) {
                 html += `
                     <tr>
                         <td>${record.studentName}</td>
-                        <td><span class="attendance-status ${statusClass}">${statusText}</span></td>
+                        <td><span style="display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; ${statusClass === 'present' ? 'background-color: #e8f5e8; color: #2e7d32;' : statusClass === 'absent' ? 'background-color: #ffebee; color: #c62828;' : 'background-color: #fff3e0; color: #ef6c00;'}">${statusText}</span></td>
                         <td>${record.remark || '-'}</td>
                     </tr>
                 `;
@@ -3986,9 +4058,9 @@ function getPeriodCalculationRules(period) {
             const submissions = homework.submissions || [];
             
             let html = `
-                <h4>${homework.title}</h4>
-                <p><strong>Classe:</strong> ${homework.className}</p>
-                <p><strong>Nombre de soumissions:</strong> ${submissions.length}</p>
+                <h4 style="margin-bottom: 1rem;">${homework.title}</h4>
+                <p style="margin-bottom: 0.5rem;"><strong>Classe:</strong> ${homework.className}</p>
+                <p style="margin-bottom: 1rem;"><strong>Nombre de soumissions:</strong> ${submissions.length}</p>
                 <div class="table-container" style="margin-top: 1rem;">
                     <table>
                         <thead>
@@ -4052,11 +4124,11 @@ function getPeriodCalculationRules(period) {
             const submission = homework.submissions[submissionIndex];
             
             let html = `
-                <h4>Noter la soumission de ${submission.studentName}</h4>
-                <p><strong>Devoir:</strong> ${homework.title}</p>
-                <p><strong>Date de soumission:</strong> ${submission.submittedAt.toDate().toLocaleDateString('fr-FR')}</p>
-                ${submission.fileURL ? `<p><a href="${submission.fileURL}" target="_blank" class="btn btn-primary"><i class="fas fa-file-download"></i> Télécharger la soumission</a></p>` : ''}
-                ${submission.textAnswer ? `<p><strong>Réponse textuelle:</strong><br>${submission.textAnswer}</p>` : ''}
+                <h4 style="margin-bottom: 1rem;">Noter la soumission de ${submission.studentName}</h4>
+                <p style="margin-bottom: 0.5rem;"><strong>Devoir:</strong> ${homework.title}</p>
+                <p style="margin-bottom: 1rem;"><strong>Date de soumission:</strong> ${submission.submittedAt.toDate().toLocaleDateString('fr-FR')}</p>
+                ${submission.fileURL ? `<p style="margin-bottom: 1rem;"><a href="${submission.fileURL}" target="_blank" class="btn btn-primary"><i class="fas fa-file-download"></i> Télécharger la soumission</a></p>` : ''}
+                ${submission.textAnswer ? `<p style="margin-bottom: 1rem;"><strong>Réponse textuelle:</strong><br>${submission.textAnswer}</p>` : ''}
                 
                 <div class="form-group">
                     <label>Note (sur ${submission.maxPoints || 20})</label>
@@ -4178,23 +4250,6 @@ function getPeriodCalculationRules(period) {
             const wb = XLSX.utils.book_new();
             const ws = XLSX.utils.aoa_to_sheet(excelData);
             
-            // Appliquer des styles
-            const range = XLSX.utils.decode_range(ws['!ref']);
-            for (let R = 0; R <= range.e.r; ++R) {
-                for (let C = 0; C <= range.e.c; ++C) {
-                    const cell_address = {c: C, r: R};
-                    const cell_ref = XLSX.utils.encode_cell(cell_address);
-                    
-                    if (R === 0) {
-                        // En-têtes
-                        ws[cell_ref].s = {
-                            font: { bold: true, color: { rgb: "FFFFFF" } },
-                            fill: { fgColor: { rgb: "2C3E50" } }
-                        };
-                    }
-                }
-            }
-            
             XLSX.utils.book_append_sheet(wb, ws, 'Élèves');
             
             // Télécharger
@@ -4242,9 +4297,12 @@ function getPeriodCalculationRules(period) {
     });
   }
   
+  // Ajuster la taille du contenu au chargement
+  window.addEventListener('load', adjustMainContent);
+  
   // Afficher la version dans la console
   console.log('%c🚀 CS La Colombe - Espace Enseignant', 'color: #3498db; font-size: 16px; font-weight: bold;');
-  console.log('%cSystème de mise à jour en temps réel activé', 'color: #2ecc71;');
+  console.log('%cVersion 2.1.0 - Interface responsive activée', 'color: #2ecc71;');
   
 })();
 
@@ -4276,58 +4334,21 @@ window.clearAppCache = function() {
   }, 1000);
 };
 
-// Afficher une notification de mise à jour
-function showUpdateNotification(newVersion, previousVersion) {
-  const updateToast = document.createElement('div');
-  updateToast.className = 'notification-toast success';
-  updateToast.innerHTML = `
-    <div class="notification-header">
-      <div class="notification-title">
-        <i class="fas fa-sync-alt"></i> Mise à jour disponible
-      </div>
-      <button class="notification-close">&times;</button>
-    </div>
-    <div class="notification-body">
-      <p>Une nouvelle version (${newVersion}) de l'application est disponible !</p>
-      <p><small>Version précédente: ${previousVersion || 'inconnue'}</small></p>
-      <div class="notification-actions" style="margin-top: 10px;">
-        <button class="btn btn-primary btn-sm" id="update-app-btn">
-          <i class="fas fa-redo"></i> Mettre à jour
-        </button>
-        <button class="btn btn-secondary btn-sm" id="later-update-btn">
-          Plus tard
-        </button>
-      </div>
-    </div>
-  `;
-  
-  document.body.appendChild(updateToast);
-  
-  setTimeout(() => {
-    updateToast.classList.add('show');
-  }, 1000);
-  
-  // Gérer le bouton de mise à jour
-  document.getElementById('update-app-btn').addEventListener('click', () => {
-    updateToast.classList.remove('show');
-    setTimeout(() => updateToast.remove(), 300);
-    
-    // Recharger la page pour activer la nouvelle version
-    window.location.reload();
-  });
-  
-  // Gérer le bouton "Plus tard"
-  document.getElementById('later-update-btn').addEventListener('click', () => {
-    updateToast.classList.remove('show');
-    setTimeout(() => updateToast.remove(), 300);
-  });
-  
-  // Fermer le toast
-  updateToast.querySelector('.notification-close').addEventListener('click', () => {
-    updateToast.classList.remove('show');
-    setTimeout(() => updateToast.remove(), 300);
-  });
-}
+// Empêcher le zoom automatique sur iOS
+document.addEventListener('touchstart', function(event) {
+  if (event.touches.length > 1) {
+    event.preventDefault();
+  }
+}, { passive: false });
+
+let lastTouchEnd = 0;
+document.addEventListener('touchend', function(event) {
+  const now = (new Date()).getTime();
+  if (now - lastTouchEnd <= 300) {
+    event.preventDefault();
+  }
+  lastTouchEnd = now;
+}, false);
 
 // Vérifier les mises à jour manuellement
 async function checkForUpdates() {
@@ -4335,19 +4356,11 @@ async function checkForUpdates() {
     const response = await fetch(`/version-check.json?t=${Date.now()}`);
     const data = await response.json();
     
-    // Vérifier la version actuelle depuis le service worker
-    if (navigator.serviceWorker.controller) {
-      navigator.serviceWorker.controller.postMessage({
-        type: 'GET_VERSION'
-      });
-    }
-    
     // Comparer avec la version stockée localement
     const currentVersion = localStorage.getItem('app_version');
     
     if (currentVersion !== data.version) {
       // Nouvelle version disponible
-      showUpdateNotification(data.version, currentVersion);
       localStorage.setItem('app_version', data.version);
     }
     
@@ -4371,12 +4384,14 @@ window.addEventListener('load', () => {
 
 // Écouter les événements de mise à jour du service worker
 let refreshing = false;
-navigator.serviceWorker.addEventListener('controllerchange', () => {
-  if (!refreshing) {
-    refreshing = true;
-    window.location.reload();
-  }
-});
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!refreshing) {
+      refreshing = true;
+      window.location.reload();
+    }
+  });
+}
 </script>
 </body>
 </html>
