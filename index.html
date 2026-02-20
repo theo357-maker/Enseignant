@@ -12,10 +12,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
     <!-- Service Worker et mise à jour -->
-
-<meta name="version" content="2.1.0">
+    <meta name="version" content="2.1.0">
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
-    
+
     <!-- PWA Meta Tags -->
     <meta name="application-name" content="TheoVêt">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -156,36 +155,39 @@
         }
         
         /* --- Sidebar Mobile --- */
+        .sidebar-mobile-overlay {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            transition: left 0.3s ease;
+        }
+        
+        .sidebar-mobile-overlay.active {
+            left: 0;
+        }
+        
         .sidebar {
-    width: 250px; 
-    background: white; 
-    box-shadow: 2px 0 10px rgba(0,0,0,0.08); 
-    flex-shrink: 0;
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    overflow-y: auto;
-    z-index: 1000;
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
-}
-
-/* Sur desktop, le menu est toujours visible */
-@media screen and (min-width: 769px) {
-    .sidebar {
-        transform: translateX(0) !important;
-    }
-    
-    .main-content {
-        margin-left: 250px !important;
-    }
-    
-    /* Cacher le bouton de fermeture sur desktop */
-    #close-sidebar-btn {
-        display: none;
-    }
-}
+            width: 250px; 
+            background: white; 
+            box-shadow: 2px 0 10px rgba(0,0,0,0.08); 
+            flex-shrink: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 1000;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .sidebar.active {
+            transform: translateX(0);
+        }
         
         .nav-menu { 
             list-style: none; 
@@ -725,6 +727,21 @@
             .app-header {
                 padding: 0.8rem;
             }
+
+/* Styles pour le menu desktop repliable */
+@media screen and (min-width: 769px) {
+    .sidebar.collapsed {
+        transform: translateX(-100%);
+    }
+    
+    .main-content.expanded {
+        margin-left: 0 !important;
+    }
+    
+    .desktop-menu-btn {
+        display: inline-block !important;
+    }
+}
             
             .main-content {
                 margin-left: 0 !important;
@@ -976,17 +993,20 @@
         
         <div class="main-content" id="main-content">
             <!-- Header Desktop -->
-            <header class="app-header desktop-only">
-                <h2 id="page-title" style="font-size: 1.5rem;">Tableau de bord</h2>
-                <div style="display: flex; align-items: center; gap: 1rem;">
-                    <!-- Photo de profil dans l'en-tête -->
-                    <div id="teacher-photo-header">
-                        <!-- La photo sera chargée dynamiquement -->
-                    </div>
-                    <span id="teacher-name-header"></span>
-                    <button id="logout-btn" class="btn btn-danger">Déconnexion</button>
-                </div>
-            </header>
+<header class="app-header desktop-only">
+    <div style="display: flex; align-items: center; gap: 1rem;">
+        <button class="desktop-menu-btn" id="desktop-menu-btn" style="background: none; border: none; font-size: 1.5rem; color: var(--primary); cursor: pointer; display: none;">
+            <i class="fas fa-bars"></i>
+        </button>
+        <h2 id="page-title" style="font-size: 1.5rem;">Tableau de bord</h2>
+    </div>
+    <div style="display: flex; align-items: center; gap: 1rem;">
+        <!-- Photo de profil dans l'en-tête -->
+        <div id="teacher-photo-header"></div>
+        <span id="teacher-name-header"></span>
+        <button id="logout-btn" class="btn btn-danger">Déconnexion</button>
+    </div>
+</header>
             
             <main class="content-area">
                 <div id="global-alert" class="alert hidden"></div>
@@ -4393,15 +4413,33 @@ if ('serviceWorker' in navigator) {
 </script>
 <script>
 
-// Détecter si l'application est installée et utilise le title bar overlay
-if ('windowControlsOverlay' in navigator) {
-    navigator.windowControlsOverlay.addEventListener('geometrychange', (event) => {
-        if (event.visible) {
-            // L'overlay des contrôles de fenêtre est visible
-            document.querySelector('.app-header').classList.add('window-controls-overlay');
-        }
-    });
+// --- Gestion du menu desktop ---
+document.getElementById('desktop-menu-btn').addEventListener('click', () => {
+    const sidebar = document.getElementById('sidebar');
+    const mainContent = document.getElementById('main-content');
+    
+    sidebar.classList.toggle('collapsed');
+    mainContent.classList.toggle('expanded');
+    
+    if (sidebar.classList.contains('collapsed')) {
+        mainContent.style.marginLeft = '0';
+    } else {
+        mainContent.style.marginLeft = '250px';
+    }
+});
+
+// Ajuster l'affichage initial du bouton desktop
+function adjustDesktopMenuButton() {
+    const desktopMenuBtn = document.getElementById('desktop-menu-btn');
+    if (window.innerWidth > 768) {
+        desktopMenuBtn.style.display = 'inline-block';
+    } else {
+        desktopMenuBtn.style.display = 'none';
+    }
 }
+
+window.addEventListener('resize', adjustDesktopMenuButton);
+adjustDesktopMenuButton();
 </script>
 </body>
-</html>
+</html> 
