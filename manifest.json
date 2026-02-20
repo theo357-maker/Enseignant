@@ -1,8 +1,8 @@
 {
-  "name": "Espace Parent - CS La Colombe",
-  "short_name": "CS La Colombe",
+  "name": "Espace Parent - hybrilink",
+  "short_name": "hybrilink",
   "description": "Application de suivi scolaire pour les parents",
-  "start_url": "index.html",
+  "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#3498db",
   "theme_color": "#3498db",
@@ -110,6 +110,12 @@
       "url": "/index.html?page=communiques",
       "icons": [{ "src": "/icon-96x96.png", "sizes": "96x96" }]
     },
+
+<!-- Dans le manifest.json, ajoutez : -->
+{
+    "display_override": ["window-controls-overlay"],
+    "theme_color": "#3498db"
+},
     {
       "name": "Notifications",
       "short_name": "Alertes",
@@ -121,7 +127,7 @@
   
   "protocol_handlers": [
     {
-      "protocol": "web+cslacolombe",
+      "protocol": "web+hybrilink",
       "url": "/index.html?url=%s"
     }
   ],
